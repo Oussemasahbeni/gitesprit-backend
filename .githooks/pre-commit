@@ -1,0 +1,19 @@
+#!/bin/sh
+# Define paths to individual scripts
+SCRIPT_DIRECTORY="$(dirname $(realpath "$0"))"
+echo $SCRIPT_DIRECTORY
+RUN_CHECK_BRANCH_SCRIPT="$SCRIPT_DIRECTORY/scripts/check-branch.sh"
+RUN_SPOTLESS_SCRIPT="$SCRIPT_DIRECTORY/scripts/run-spotless.sh"
+
+# Run Branch Naming script
+if ! "$RUN_CHECK_BRANCH_SCRIPT"; then
+    exit 1
+fi
+# Run Spotless script
+if ! "$RUN_SPOTLESS_SCRIPT"; then
+    exit 1
+fi
+
+
+echo "All pre-commit checks passed."
+exit 0

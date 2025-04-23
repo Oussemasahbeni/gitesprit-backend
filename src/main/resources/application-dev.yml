@@ -1,0 +1,16 @@
+spring:
+  docker:
+    compose:
+      lifecycle-management: start_only
+  cloud:
+    azure:
+      storage:
+        blob:
+          account-name: ${AZURE_ACCOUNT_NAME}
+          account-key: ${AZURE_ACCOUNT_KEY}
+          connection-string: ${AZURE_CONNECTION_STRING}
+          endpoint: ${AZURE_ENDPOINT}
+  threads:
+    virtual:
+      enabled: false
+

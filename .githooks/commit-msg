@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Read the commit message
+commit_msg_file=$1
+commit_msg=$(cat "$commit_msg_file")
+
+# Regex pattern for commit message validation
+commit_regex="^(feat|fix|docs|style|refactor|test|config|chore)\([a-zA-Z0-9-]+\): [a-zA-Z].{9,}$|^Merge (branch|pull request) '?.+'?$"
+# Validate commit message
+if [[ ! "$commit_msg" =~ $commit_regex ]]; then
+    echo "❌ Invalid commit message format!"
+    echo "➡️  Expected format: '<type>(<scope>): <message>'"
+    echo "   Example: 'feat(JIRA-ID): add login button'"
+    echo "   Allowed types: feat, fix, docs, style, refactor, test, config,chore"
+    exit 1
+fi
+
+echo "✅ Commit message format is valid!"
+exit 0
