@@ -37,8 +37,8 @@ services:
     networks:
       - gitesprit-network
     volumes:
-#      - ../kc-providers:/opt/keycloak/providers/
-      - ../kc-realm/:/opt/keycloak/data/import/
+      - ./kc-providers:/opt/keycloak/providers/
+      - ./kc-realm/:/opt/keycloak/data/import/
     depends_on:
       - postgres
     command:
