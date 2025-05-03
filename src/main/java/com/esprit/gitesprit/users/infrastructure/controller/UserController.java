@@ -1,6 +1,10 @@
 package com.esprit.gitesprit.users.infrastructure.controller;
 
+import com.esprit.gitesprit.auth.domain.enums.Role;
 import com.esprit.gitesprit.cloudstorage.domain.model.Blob;
+import com.esprit.gitesprit.shared.pagination.CustomPage;
+import com.esprit.gitesprit.shared.pagination.PageMapper;
+import com.esprit.gitesprit.shared.pagination.PaginationUtils;
 import com.esprit.gitesprit.users.domain.enums.NotificationPreference;
 import com.esprit.gitesprit.users.domain.model.User;
 import com.esprit.gitesprit.users.domain.port.input.UserUseCases;
@@ -16,6 +20,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -56,6 +62,26 @@ public class UserController {
             @Parameter(description = "ID of the user to be retrieved", required = true) @PathVariable UUID id) {
         return ResponseEntity.ok(userMapper.toUserDto(usersUseCases.findById(id)));
     }
+
+    @Operation(
+            summary = "Find all users",
+            description =
+                    "Retrieve all users with pagination, sorting, and filtering options. Supports sorting by fields and filtering based on criteria.")
+    @GetMapping()
+    public ResponseEntity<CustomPage<UserDto>> findAll(
+            @RequestParam(defaultValue = "0", required = false) int page,
+            @RequestParam(defaultValue = "10", required = false) int size,
+            @RequestParam(defaultValue = "id", required = false) String sort,
+            @RequestParam(defaultValue = "", required = false) String search,
+            @RequestParam(defaultValue = "DESC") String sortDirection,
+            @RequestParam(required = false) Role role) {
+        Pageable pageable = PaginationUtils.createPageable(page, size, sort, sortDirection);
+
+        Page<UserDto> usersPage =
+                usersUseCases.findAllPaginated(search, role, pageable).map(userMapper::toUserDto);
+        return ResponseEntity.ok(PageMapper.toCustomPage(usersPage));
+    }
+
 
     @GetMapping("/me")
     @Operation(

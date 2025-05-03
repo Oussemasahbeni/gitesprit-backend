@@ -1,9 +1,13 @@
 package com.esprit.gitesprit.users.domain.port.input;
 
+import aj.org.objectweb.asm.commons.Remapper;
+import com.esprit.gitesprit.auth.domain.enums.Role;
 import com.esprit.gitesprit.cloudstorage.domain.model.Blob;
 import com.esprit.gitesprit.users.domain.enums.NotificationPreference;
 import com.esprit.gitesprit.users.domain.model.User;
 import com.esprit.gitesprit.users.infrastructure.dto.request.UpdateProfileRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
@@ -42,4 +46,6 @@ public interface UserUseCases {
     void updateNotificationPreference(UUID id, NotificationPreference notificationPreference);
 
     User findCurrentUser(UUID id);
+
+    Page<User> findAllPaginated(String search, Role role, Pageable pageable);
 }

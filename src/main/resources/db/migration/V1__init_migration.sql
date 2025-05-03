@@ -51,6 +51,15 @@ CREATE TABLE users
     CONSTRAINT pk_users PRIMARY KEY (id)
 );
 
+CREATE TABLE user_roles
+(
+    id               UUID         NOT NULL,
+    user_id          UUID         NOT NULL,
+    name             VARCHAR(255) NOT NULL,
+    CONSTRAINT pk_user_roles PRIMARY KEY (id),
+    CONSTRAINT fk_user_roles_user FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
 ALTER TABLE users
     ADD CONSTRAINT uc_users_email UNIQUE (email);
 

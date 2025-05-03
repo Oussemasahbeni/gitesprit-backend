@@ -341,16 +341,16 @@ public class KeycloakUserAdapter implements IdentityProvider {
     private AuthUser mapUser(UserRepresentation userRepresentation) {
         List<Role> roles = getUserRoles(userRepresentation.getId());
         AuthUser authUser = authMapper.toAuthUser(userRepresentation);
-        String locale = userRepresentation.getAttributes().getOrDefault("locale", List.of(DEFAULT_LOCALE)).stream()
-                .findFirst()
-                .orElse(null);
-        authUser.setLocale(Locale.valueOf(locale));
-        authUser.setPhoneNumber(userRepresentation.getAttributes().getOrDefault("phoneNumber", List.of()).stream()
-                .findFirst()
-                .orElse(null));
-        authUser.setProfilePicture(userRepresentation.getAttributes().getOrDefault("profilePicture", List.of()).stream()
-                .findFirst()
-                .orElse(null));
+//        String locale = userRepresentation.getAttributes().getOrDefault("locale", List.of(DEFAULT_LOCALE)).stream()
+//                .findFirst()
+//                .orElse(null);
+//        authUser.setLocale(Locale.valueOf(locale));
+//        authUser.setPhoneNumber(userRepresentation.getAttributes().getOrDefault("phoneNumber", List.of()).stream()
+//                .findFirst()
+//                .orElse(null));
+//        authUser.setProfilePicture(userRepresentation.getAttributes().getOrDefault("profilePicture", List.of()).stream()
+//                .findFirst()
+//                .orElse(null));
 
         authUser.setRoles(roles);
         return authUser;

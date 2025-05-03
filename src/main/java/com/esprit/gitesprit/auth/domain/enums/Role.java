@@ -3,10 +3,9 @@ package com.esprit.gitesprit.auth.domain.enums;
 import java.util.Optional;
 
 public enum Role {
-    super_admin,
     admin,
-    user,
-    partner;
+    teacher,
+    student;
 
     public static Optional<Role> fromString(String roleStr) {
         for (Role role : Role.values()) {

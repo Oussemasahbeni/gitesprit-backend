@@ -11,6 +11,8 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -56,6 +58,9 @@ public class UserEntity extends AbstractAuditingEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "gender")
     private Gender gender;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<RoleEntity> roles = new ArrayList<>();
 
     @PrePersist
     @PreUpdate

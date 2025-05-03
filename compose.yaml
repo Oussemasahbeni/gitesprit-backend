@@ -33,7 +33,6 @@ services:
       KC_HTTP_ENABLED: true
       KC_HEALTH_ENABLED: true
       KC_METRICS_ENABLED: true
-      AGR_BACKEND_BASE_URL: "http://host.docker.internal:8081"
     networks:
       - gitesprit-network
     volumes:
@@ -44,6 +43,17 @@ services:
     command:
       - start-dev
       - --import-realm
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    networks:
+      - gitesprit-network
   mail-dev:
     container_name: mail-dev-gitesprit
     image: maildev/maildev

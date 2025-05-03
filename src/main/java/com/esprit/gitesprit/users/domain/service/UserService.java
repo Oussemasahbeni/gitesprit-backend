@@ -1,5 +1,6 @@
 package com.esprit.gitesprit.users.domain.service;
 
+import com.esprit.gitesprit.auth.domain.enums.Role;
 import com.esprit.gitesprit.auth.domain.model.AuthUser;
 import com.esprit.gitesprit.auth.domain.service.IdentityProviderService;
 import com.esprit.gitesprit.cloudstorage.domain.model.Blob;
@@ -15,6 +16,8 @@ import com.esprit.gitesprit.users.domain.port.input.UserUseCases;
 import com.esprit.gitesprit.users.domain.port.output.Users;
 import com.esprit.gitesprit.users.infrastructure.dto.request.UpdateProfileRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
@@ -106,5 +109,10 @@ public class UserService implements UserUseCases {
                 () ->
                     new NotFoundException(NotFoundException.NotFoundExceptionType.USER_NOT_FOUND));
 
+  }
+
+  @Override
+  public Page<User> findAllPaginated(String search, Role role, Pageable pageable) {
+    return users.findAll(search, pageable, role);
   }
 }

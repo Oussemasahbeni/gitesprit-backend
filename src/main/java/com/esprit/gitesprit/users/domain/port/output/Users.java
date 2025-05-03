@@ -1,10 +1,13 @@
 package com.esprit.gitesprit.users.domain.port.output;
 
 import com.esprit.gitesprit.auth.domain.enums.Locale;
+import com.esprit.gitesprit.auth.domain.enums.Role;
 import com.esprit.gitesprit.auth.domain.model.AuthUser;
 import com.esprit.gitesprit.users.domain.enums.NotificationPreference;
 import com.esprit.gitesprit.users.domain.model.User;
 import com.esprit.gitesprit.users.infrastructure.dto.request.UpdateProfileRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -27,4 +30,5 @@ public interface Users {
 
     void updateLocale(String id, Locale locale);
 
+    Page<User> findAll(String search, Pageable pageable, Role role);
 }

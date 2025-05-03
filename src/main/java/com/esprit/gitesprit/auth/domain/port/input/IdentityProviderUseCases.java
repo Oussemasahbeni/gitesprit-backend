@@ -23,7 +23,6 @@ public interface IdentityProviderUseCases {
 
     AuthUser createAdmin(AuthUser authUser);
 
-    AuthUser createPartner(AuthUser authUser);
 
     /**
      * Updates an existing user record.

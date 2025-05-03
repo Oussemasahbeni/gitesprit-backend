@@ -30,7 +30,7 @@ public class IdentityProviderService implements IdentityProviderUseCases {
     public AuthUser createUser(AuthUser authUser) {
         List<String> groups = List.of("users");
         List<String> requiredActions = List.of("UPDATE_PASSWORD");
-        List<Role> roles = List.of(Role.user);
+        List<Role> roles = List.of(Role.student);
         AuthUser createdUser = iamUserRepository.create(authUser, roles, groups, requiredActions, true, false, true);
         users.createFromAuthUser(createdUser);
         return createdUser;
@@ -46,12 +46,7 @@ public class IdentityProviderService implements IdentityProviderUseCases {
         return createdUser;
     }
 
-    @Override
-    public AuthUser createPartner(AuthUser authUser) {
-        List<String> requiredActions = List.of("UPDATE_PASSWORD");
-        List<Role> roles = List.of(Role.partner);
-        return iamUserRepository.create(authUser, roles, null, requiredActions, true, true, true);
-    }
+
 
     @Override
     public AuthUser update(AuthUser authUser) {
