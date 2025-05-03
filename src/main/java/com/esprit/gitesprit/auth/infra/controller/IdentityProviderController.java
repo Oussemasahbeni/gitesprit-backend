@@ -1,11 +1,10 @@
 package com.esprit.gitesprit.auth.infra.controller;
 
 import com.esprit.gitesprit.auth.domain.enums.Locale;
-import com.esprit.gitesprit.auth.domain.enums.Role;
+import com.esprit.gitesprit.auth.domain.enums.RoleType;
 import com.esprit.gitesprit.auth.domain.model.AuthUser;
 import com.esprit.gitesprit.auth.domain.port.input.IdentityProviderUseCases;
 import com.esprit.gitesprit.auth.infra.dto.request.UpdateUserRequestDto;
-import com.esprit.gitesprit.auth.infra.dto.request.UserRequestDto;
 import com.esprit.gitesprit.auth.infra.dto.response.UserDto;
 import com.esprit.gitesprit.auth.infra.mapper.DtoMapper;
 import com.esprit.gitesprit.shared.pagination.CustomPage;
@@ -180,7 +179,7 @@ public class IdentityProviderController {
     /**
      * Retrieves all users with a specified role.
      *
-     * @param role the role to filter by
+     * @param roleType the role to filter by
      * @return the list of users
      */
     @Operation(summary = "Get users by role", description = "Retrieves all users with a specific role.")
@@ -198,8 +197,8 @@ public class IdentityProviderController {
             })
     @GetMapping("/role/{role}")
     public ResponseEntity<List<UserDto>> getByRole(
-            @Parameter(description = "Role to filter users by", required = true) @PathVariable("role") Role role) {
-        List<AuthUser> users = this.identityProviderUseCases.findByRole(role);
+            @Parameter(description = "Role to filter users by", required = true) @PathVariable("role") RoleType roleType) {
+        List<AuthUser> users = this.identityProviderUseCases.findByRole(roleType);
         return new ResponseEntity<>(dtoMapper.toUserDtoList(users), HttpStatus.OK);
     }
 
@@ -235,46 +234,9 @@ public class IdentityProviderController {
      * @param userRequestDto the user request data
      * @return the created user
      */
-    @Operation(summary = "Create user", description = "Creates a new normal user.")
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            responseCode = "201",
-                            description = "User created successfully",
-                            content =
-                            @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = UserDto.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
-                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
-            })
-    @PostMapping("/create/users")
-    public ResponseEntity<UserDto> createUser(@RequestBody @Valid UserRequestDto userRequestDto) {
-        AuthUser authUser = dtoMapper.toAuthUser(userRequestDto);
-        authUser = this.identityProviderUseCases.createUser(authUser);
-        return new ResponseEntity<>(dtoMapper.toUserDto(authUser), HttpStatus.CREATED); // Changed to 201
-    }
 
-    @Operation(summary = "Create admin user", description = "Creates a new admin user.")
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            responseCode = "201",
-                            description = "Admin user created successfully",
-                            content =
-                            @Content(
-                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = UserDto.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
-                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
-            })
-    @PostMapping("/create/admins")
-    public ResponseEntity<UserDto> createAdmin(@RequestBody @Valid UserRequestDto userRequestDto) {
-        AuthUser authUser = dtoMapper.toAuthUser(userRequestDto);
-        authUser = this.identityProviderUseCases.createAdmin(authUser);
-        return new ResponseEntity<>(dtoMapper.toUserDto(authUser), HttpStatus.CREATED); // Changed to 201
-    }
-    
+
+
 
     /**
      * Updates an existing user.
@@ -358,11 +320,11 @@ public class IdentityProviderController {
             @Parameter(description = "Sort direction (ASC or DESC)", example = "ASC")
             @RequestParam(defaultValue = "ASC")
             String sortDirection,
-            @Parameter(description = "Filter by role") @RequestParam(required = false) Role role) {
+            @Parameter(description = "Filter by role") @RequestParam(required = false) RoleType roleType) {
 
         Pageable pageable = PaginationUtils.createPageable(page, size, sort, sortDirection);
 
-        Page<AuthUser> users = this.identityProviderUseCases.findAll(List.of(String.valueOf(role)), search, pageable);
+        Page<AuthUser> users = this.identityProviderUseCases.findAll(List.of(String.valueOf(roleType)), search, pageable);
         CustomPage<UserDto> userspage = PageMapper.toCustomPage(users.map(dtoMapper::toUserDto));
         return new ResponseEntity<>(userspage, HttpStatus.OK);
     }

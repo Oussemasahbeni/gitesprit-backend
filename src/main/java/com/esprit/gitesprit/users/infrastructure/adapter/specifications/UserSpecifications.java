@@ -1,11 +1,9 @@
 package com.esprit.gitesprit.users.infrastructure.adapter.specifications;
 
-import com.esprit.gitesprit.auth.domain.enums.Role;
+import com.esprit.gitesprit.auth.domain.enums.RoleType;
 import com.esprit.gitesprit.users.infrastructure.entity.UserEntity;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
-
-import java.util.UUID;
 
 /**
  * Specifications for querying UserEntity. - root is the entity that we are working with - query is
@@ -22,7 +20,7 @@ public class UserSpecifications {
      * @param criteria the search criteria
      * @return a specification for finding users by criteria
      */
-    public static Specification<UserEntity> hasCriteria(String criteria, Role role) {
+    public static Specification<UserEntity> hasCriteria(String criteria, RoleType roleType) {
         return (root, query, cb) -> {
 
             Predicate result =
@@ -31,8 +29,8 @@ public class UserSpecifications {
                     cb.like(cb.lower(root.get("firstName")), "%" + criteria.toLowerCase() + "%"),
                     cb.like(cb.lower(root.get("lastName")), "%" + criteria.toLowerCase() + "%"));
 
-            if (role != null) {
-                Predicate roles = cb.equal(root.join("roles").get("name"), role.name());
+            if (roleType != null) {
+                Predicate roles = cb.equal(root.join("roles").get("name"), roleType.name());
                 result = cb.and(result, roles);
             }
             return result;

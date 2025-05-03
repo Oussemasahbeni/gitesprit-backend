@@ -1,7 +1,7 @@
 package com.esprit.gitesprit.auth.domain.port.output;
 
 import com.esprit.gitesprit.auth.domain.enums.Locale;
-import com.esprit.gitesprit.auth.domain.enums.Role;
+import com.esprit.gitesprit.auth.domain.enums.RoleType;
 import com.esprit.gitesprit.auth.domain.model.AuthUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,11 +21,9 @@ public interface IdentityProvider {
 
     AuthUser create(
             AuthUser user,
-            List<Role> roles,
+            List<RoleType> roleTypes,
             List<String> groups,
             List<String> requiredActions,
-            boolean enabled,
-            boolean emailVerified,
             boolean sendEmail);
 
     AuthUser update(AuthUser user);
@@ -38,7 +36,7 @@ public interface IdentityProvider {
      */
     List<AuthUser> findByCustomAttribute(String query);
 
-    List<AuthUser> findByRole(Role role);
+    List<AuthUser> findByRole(RoleType roleType);
 
     void deleteById(String id);
 

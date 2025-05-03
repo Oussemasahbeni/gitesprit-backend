@@ -12,6 +12,7 @@ public record UserDto(
         String email,
         String fullName,
         String firstName,
+        String username,
         String lastName,
         String profilePicture,
         String phoneNumber,

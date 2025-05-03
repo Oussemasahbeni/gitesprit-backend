@@ -1,7 +1,7 @@
 package com.esprit.gitesprit.users.domain.port.input;
 
-import aj.org.objectweb.asm.commons.Remapper;
-import com.esprit.gitesprit.auth.domain.enums.Role;
+import com.esprit.gitesprit.auth.domain.enums.RoleType;
+import com.esprit.gitesprit.users.infrastructure.dto.request.UserRequestDto;
 import com.esprit.gitesprit.cloudstorage.domain.model.Blob;
 import com.esprit.gitesprit.users.domain.enums.NotificationPreference;
 import com.esprit.gitesprit.users.domain.model.User;
@@ -47,5 +47,11 @@ public interface UserUseCases {
 
     User findCurrentUser(UUID id);
 
-    Page<User> findAllPaginated(String search, Role role, Pageable pageable);
+    Page<User> findAllPaginated(String search, RoleType roleType, Pageable pageable);
+
+    User createUser(UserRequestDto authUser);
+
+    Boolean existsByEmail(String email);
+
+    void deleteById(UUID id);
 }

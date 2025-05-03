@@ -1,8 +1,7 @@
 package com.esprit.gitesprit.users.infrastructure.adapter.persistence;
 
 import com.esprit.gitesprit.auth.domain.enums.Locale;
-import com.esprit.gitesprit.auth.domain.enums.Role;
-import com.esprit.gitesprit.auth.domain.model.AuthUser;
+import com.esprit.gitesprit.auth.domain.enums.RoleType;
 import com.esprit.gitesprit.exception.ConflictException;
 import com.esprit.gitesprit.exception.NotFoundException;
 import com.esprit.gitesprit.shared.annotation.PersistenceAdapter;
@@ -11,6 +10,7 @@ import com.esprit.gitesprit.users.domain.model.User;
 import com.esprit.gitesprit.users.domain.port.output.Users;
 import com.esprit.gitesprit.users.infrastructure.adapter.specifications.UserSpecifications;
 import com.esprit.gitesprit.users.infrastructure.dto.request.UpdateProfileRequest;
+import com.esprit.gitesprit.users.infrastructure.entity.RoleEntity;
 import com.esprit.gitesprit.users.infrastructure.entity.UserEntity;
 import com.esprit.gitesprit.users.infrastructure.mapper.UserMapper;
 import com.esprit.gitesprit.users.infrastructure.repository.UserRepository;
@@ -21,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,9 +45,20 @@ public class UserJpaAdapter implements Users {
     }
 
     @Override
-    public void createFromAuthUser(AuthUser user) {
-        UserEntity userEntity = userMapper.toUserFromAuthUsedr(user);
-        userRepository.save(userEntity);
+    public User create(User user, List<RoleType> roles) {
+        UserEntity userEntity = userMapper.toUserEntity(user);
+
+        if (roles != null && !roles.isEmpty()) {
+            userEntity.setRoles(new ArrayList<>());
+            for (RoleType role : roles) {
+                RoleEntity roleEntity = new RoleEntity();
+                roleEntity.setName(role);
+                roleEntity.setUser(userEntity);
+                userEntity.getRoles().add(roleEntity);
+            }
+        }
+        UserEntity savedUser= userRepository.save(userEntity);
+        return userMapper.toUser(savedUser);
     }
 
 
@@ -101,10 +114,15 @@ public class UserJpaAdapter implements Users {
     }
 
     @Override
-    public Page<User> findAll(String search, Pageable pageable, Role role) {
+    public Page<User> findAll(String search, Pageable pageable, RoleType roleType) {
         return userRepository
-                .findAll(UserSpecifications.hasCriteria(search, role), pageable)
+                .findAll(UserSpecifications.hasCriteria(search, roleType), pageable)
                 .map(userMapper::toUser);
+    }
+
+    @Override
+    public Boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
     }
 
 }

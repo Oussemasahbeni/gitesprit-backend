@@ -1,7 +1,6 @@
 package com.esprit.gitesprit.users.infrastructure.entity;
 
-import com.esprit.gitesprit.auth.domain.enums.Role;
-import com.esprit.gitesprit.users.domain.model.User;
+import com.esprit.gitesprit.auth.domain.enums.RoleType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,5 +26,5 @@ public class RoleEntity {
     private UserEntity user;
     @Column(name = "name", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Role name;
+    private RoleType name;
 }

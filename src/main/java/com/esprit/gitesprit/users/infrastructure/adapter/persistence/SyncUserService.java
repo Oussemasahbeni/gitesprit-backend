@@ -1,8 +1,7 @@
 package com.esprit.gitesprit.users.infrastructure.adapter.persistence;
 
 
-import com.esprit.gitesprit.auth.domain.enums.Role;
-import com.esprit.gitesprit.users.domain.model.User;
+import com.esprit.gitesprit.auth.domain.enums.RoleType;
 import com.esprit.gitesprit.users.infrastructure.dto.request.SyncUserRequest;
 import com.esprit.gitesprit.users.infrastructure.entity.RoleEntity;
 import com.esprit.gitesprit.users.infrastructure.entity.UserEntity;
@@ -49,12 +48,12 @@ public class SyncUserService {
         if (message.roles() != null && !message.roles().isEmpty()) {
             for (String roleName : message.roles()) {
 
-                Optional<Role> roleOptional = Role.fromString(roleName);
+                Optional<RoleType> roleOptional = RoleType.fromString(roleName);
 
                 if (roleOptional.isPresent()) {
-                    Role validRoleEnum = roleOptional.get();
+                    RoleType validRoleTypeEnum = roleOptional.get();
                     RoleEntity roleEntity = RoleEntity.builder()
-                            .name(validRoleEnum)
+                            .name(validRoleTypeEnum)
                             .user(user)
                             .build();
 

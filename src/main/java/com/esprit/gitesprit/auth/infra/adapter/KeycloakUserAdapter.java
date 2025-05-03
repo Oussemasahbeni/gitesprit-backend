@@ -1,7 +1,7 @@
 package com.esprit.gitesprit.auth.infra.adapter;
 
 import com.esprit.gitesprit.auth.domain.enums.Locale;
-import com.esprit.gitesprit.auth.domain.enums.Role;
+import com.esprit.gitesprit.auth.domain.enums.RoleType;
 import com.esprit.gitesprit.auth.domain.model.AuthUser;
 import com.esprit.gitesprit.auth.domain.port.output.IdentityProvider;
 import com.esprit.gitesprit.auth.infra.mapper.AuthMapper;
@@ -97,21 +97,21 @@ public class KeycloakUserAdapter implements IdentityProvider {
             UserRepresentation user, List<String> roles, List<AuthUser> authUsers, RealmResource realmResource) {
         List<RoleRepresentation> userRoles =
                 realmResource.users().get(user.getId()).roles().realmLevel().listEffective();
-        List<Role> roleEnums = new ArrayList<>();
+        List<RoleType> roleTypeEnums = new ArrayList<>();
         for (RoleRepresentation roleRepresentation : userRoles) {
             if (roleRepresentation.getName().equals("default-roles-" + realm)) {
                 Set<RoleRepresentation> defaultRoles =
                         realmResource.rolesById().getRoleComposites(roleRepresentation.getId());
                 for (RoleRepresentation defaultRole : defaultRoles) {
-                    roleEnums.add(Role.fromString(defaultRole.getName()).orElse(null));
+                    roleTypeEnums.add(RoleType.fromString(defaultRole.getName()).orElse(null));
                 }
             } else {
-                roleEnums.add(Role.fromString(roleRepresentation.getName()).orElse(null));
+                roleTypeEnums.add(RoleType.fromString(roleRepresentation.getName()).orElse(null));
             }
         }
-        roleEnums = roleEnums.stream().filter(Objects::nonNull).toList();
+        roleTypeEnums = roleTypeEnums.stream().filter(Objects::nonNull).toList();
 
-        if (!roles.isEmpty() && roleEnums.stream().anyMatch(role -> roles.contains(role.toString()))) {
+        if (!roles.isEmpty() && roleTypeEnums.stream().anyMatch(role -> roles.contains(role.toString()))) {
             AuthUser mappedUser = mapUser(user);
             authUsers.add(mappedUser);
         }
@@ -178,9 +178,9 @@ public class KeycloakUserAdapter implements IdentityProvider {
      * roles in keycloak
      */
     @Override
-    public List<AuthUser> findByRole(Role role) {
+    public List<AuthUser> findByRole(RoleType roleType) {
         List<UserRepresentation> users =
-                keycloak.realm(realm).roles().get(role.name()).getUserMembers();
+                keycloak.realm(realm).roles().get(roleType.name()).getUserMembers();
         List<AuthUser> authUsers = new ArrayList<>();
         for (UserRepresentation user : users) {
             AuthUser mappedUser = mapUser(user);
@@ -204,33 +204,20 @@ public class KeycloakUserAdapter implements IdentityProvider {
     @Override
     public AuthUser create(
             AuthUser authUser,
-            List<Role> roles,
+            List<RoleType> roleTypes,
             List<String> groups,
             List<String> requiredActions,
-            boolean enabled,
-            boolean emailVerified,
             boolean sendUpdatePasswordEmail) {
         log.info("Creating user with email: {}", authUser.getEmail());
         try {
-            Locale locale = Locale.ar;
             UserRepresentation userRepresentation = authMapper.toUserRepresentation(authUser);
-            Map<String, List<String>> attributes = new HashMap<>();
-            attributes.put("phoneNumber", List.of(authUser.getPhoneNumber()));
-            attributes.put("locale", List.of(locale.name()));
-
-            if (authUser.getProfilePicture() != null) {
-                attributes.put("profilePicture", List.of(authUser.getProfilePicture()));
-            }
-            userRepresentation.setAttributes(attributes);
-            userRepresentation.setEnabled(enabled);
-            userRepresentation.setEmailVerified(emailVerified);
-            userRepresentation.setUsername(authUser.getUsername());
+            userRepresentation.setAttributes(authUser.getAttributes());
             userRepresentation.setGroups(groups);
             userRepresentation.setRequiredActions(requiredActions);
             Response response = keycloak.realm(realm).users().create(userRepresentation);
             String userId = CreatedResponseUtil.getCreatedId(response);
-            if (roles != null) {
-                roles.forEach(role -> {
+            if (roleTypes != null) {
+                roleTypes.forEach(role -> {
                     RoleRepresentation roleRepresentation =
                             keycloak.realm(realm).roles().get(role.toString()).toRepresentation();
                     keycloak.realm(realm)
@@ -241,14 +228,12 @@ public class KeycloakUserAdapter implements IdentityProvider {
                             .add(Collections.singletonList(roleRepresentation));
                 });
             }
-            // Add required action to set password
-
             if (sendUpdatePasswordEmail) {
                 keycloak.realm(realm)
                         .users()
                         .get(userId)
                         .executeActionsEmail(
-                                "agriculture-web-app", frontendUrl, Collections.singletonList("UPDATE_PASSWORD"));
+                                "gitesprit-frontend", frontendUrl, Collections.singletonList("UPDATE_PASSWORD"));
             }
 
             log.info("User with email: {} created successfully", authUser.getEmail());
@@ -268,15 +253,15 @@ public class KeycloakUserAdapter implements IdentityProvider {
 
         AuthUser newUser = authMapper.partialUpdate(user, oldUser);
         UserRepresentation userRepresentation = authMapper.toUserRepresentation(newUser);
-        if (user.getLocale() != null) {
-            userRepresentation.singleAttribute("locale", user.getLocale().name());
-        }
-        if (user.getPhoneNumber() != null) {
-            userRepresentation.singleAttribute("phoneNumber", user.getPhoneNumber());
-        }
-        if (user.getProfilePicture() != null) {
-            userRepresentation.singleAttribute("profilePicture", user.getProfilePicture());
-        }
+//        if (user.getLocale() != null) {
+//            userRepresentation.singleAttribute("locale", user.getLocale().name());
+//        }
+//        if (user.getPhoneNumber() != null) {
+//            userRepresentation.singleAttribute("phoneNumber", user.getPhoneNumber());
+//        }
+//        if (user.getProfilePicture() != null) {
+//            userRepresentation.singleAttribute("profilePicture", user.getProfilePicture());
+//        }
         keycloak.realm(realm).users().get(user.getId()).update(userRepresentation);
 
         return this.findById(user.getId())
@@ -327,19 +312,19 @@ public class KeycloakUserAdapter implements IdentityProvider {
         return authMapper.toAuthUser(userRepresentationUpdated);
     }
 
-    private List<Role> getUserRoles(String userId) {
+    private List<RoleType> getUserRoles(String userId) {
         List<RoleRepresentation> realmRoles =
                 keycloak.realm(realm).users().get(userId).roles().realmLevel().listEffective();
         return realmRoles.stream()
                 .map(RoleRepresentation::getName)
                 .filter(roleName ->
                         Arrays.asList("admin", "user", "super_admin").contains(roleName))
-                .map(Role::valueOf)
+                .map(RoleType::valueOf)
                 .toList();
     }
 
     private AuthUser mapUser(UserRepresentation userRepresentation) {
-        List<Role> roles = getUserRoles(userRepresentation.getId());
+        List<RoleType> roleTypes = getUserRoles(userRepresentation.getId());
         AuthUser authUser = authMapper.toAuthUser(userRepresentation);
 //        String locale = userRepresentation.getAttributes().getOrDefault("locale", List.of(DEFAULT_LOCALE)).stream()
 //                .findFirst()
@@ -352,7 +337,7 @@ public class KeycloakUserAdapter implements IdentityProvider {
 //                .findFirst()
 //                .orElse(null));
 
-        authUser.setRoles(roles);
+        authUser.setRoleTypes(roleTypes);
         return authUser;
     }
 }

@@ -1,7 +1,7 @@
 package com.esprit.gitesprit.auth.domain.service;
 
 import com.esprit.gitesprit.auth.domain.enums.Locale;
-import com.esprit.gitesprit.auth.domain.enums.Role;
+import com.esprit.gitesprit.auth.domain.enums.RoleType;
 import com.esprit.gitesprit.auth.domain.model.AuthUser;
 import com.esprit.gitesprit.auth.domain.port.input.IdentityProviderUseCases;
 import com.esprit.gitesprit.auth.domain.port.output.IdentityProvider;
@@ -25,26 +25,6 @@ public class IdentityProviderService implements IdentityProviderUseCases {
 
     private final IdentityProvider iamUserRepository;
     private final Users users;
-
-    @Override
-    public AuthUser createUser(AuthUser authUser) {
-        List<String> groups = List.of("users");
-        List<String> requiredActions = List.of("UPDATE_PASSWORD");
-        List<Role> roles = List.of(Role.student);
-        AuthUser createdUser = iamUserRepository.create(authUser, roles, groups, requiredActions, true, false, true);
-        users.createFromAuthUser(createdUser);
-        return createdUser;
-    }
-
-    @Override
-    public AuthUser createAdmin(AuthUser authUser) {
-        List<String> groups = List.of("admins");
-        List<String> requiredActions = List.of("UPDATE_PASSWORD");
-        List<Role> roles = List.of(Role.admin);
-        AuthUser createdUser = iamUserRepository.create(authUser, roles, groups, requiredActions, true, true, true);
-        users.createFromAuthUser(createdUser);
-        return createdUser;
-    }
 
 
 
@@ -82,8 +62,8 @@ public class IdentityProviderService implements IdentityProviderUseCases {
     }
 
     @Override
-    public List<AuthUser> findByRole(Role role) {
-        return iamUserRepository.findByRole(role);
+    public List<AuthUser> findByRole(RoleType roleType) {
+        return iamUserRepository.findByRole(roleType);
     }
 
     @Override

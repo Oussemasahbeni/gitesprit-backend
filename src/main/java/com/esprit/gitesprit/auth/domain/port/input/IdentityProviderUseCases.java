@@ -1,7 +1,7 @@
 package com.esprit.gitesprit.auth.domain.port.input;
 
 import com.esprit.gitesprit.auth.domain.enums.Locale;
-import com.esprit.gitesprit.auth.domain.enums.Role;
+import com.esprit.gitesprit.auth.domain.enums.RoleType;
 import com.esprit.gitesprit.auth.domain.model.AuthUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,15 +13,6 @@ import java.util.Optional;
 
 public interface IdentityProviderUseCases {
 
-    /**
-     * Creates a new user record.
-     *
-     * @param authUser The user details to create.
-     * @return The created user.
-     */
-    AuthUser createUser(AuthUser authUser);
-
-    AuthUser createAdmin(AuthUser authUser);
 
 
     /**
@@ -50,7 +41,7 @@ public interface IdentityProviderUseCases {
      */
     List<AuthUser> findByCustomAttribute(String query);
 
-    List<AuthUser> findByRole(Role role);
+    List<AuthUser> findByRole(RoleType roleType);
 
     List<AuthUser> findByGroup(String role);
 

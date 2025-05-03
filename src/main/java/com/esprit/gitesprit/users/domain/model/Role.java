@@ -1,5 +1,6 @@
 package com.esprit.gitesprit.users.domain.model;
 
+import com.esprit.gitesprit.auth.domain.enums.RoleType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,5 +18,5 @@ public class Role {
 
     private UUID id;
     private User user;
-    private String name;
+    private RoleType name;
 }

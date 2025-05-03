@@ -3,7 +3,7 @@ package com.esprit.gitesprit.config.init;
 
 
 import com.esprit.gitesprit.auth.domain.enums.Locale;
-import com.esprit.gitesprit.auth.domain.enums.Role;
+import com.esprit.gitesprit.auth.domain.enums.RoleType;
 import com.esprit.gitesprit.auth.infra.utils.KeycloakUtils;
 import com.esprit.gitesprit.users.infrastructure.entity.RoleEntity;
 import com.esprit.gitesprit.users.infrastructure.entity.UserEntity;
@@ -71,7 +71,7 @@ public class CreateDefaultUser {
                                 .build();
 
                 RoleEntity roleEntity = RoleEntity.builder()
-                        .name(Role.admin)
+                        .name(RoleType.admin)
                         .user(defaultAdmin)
                         .build();
 
@@ -98,7 +98,7 @@ public class CreateDefaultUser {
                 Response adminResponse = keycloak.realm(realm).users().create(adminRepresentation);
                 String adminUserId = CreatedResponseUtil.getCreatedId(adminResponse);
                 RoleRepresentation adminRole =
-                        keycloak.realm(realm).roles().get(String.valueOf(Role.admin)).toRepresentation();
+                        keycloak.realm(realm).roles().get(String.valueOf(RoleType.admin)).toRepresentation();
                 List<RoleRepresentation> adminRoles = List.of( adminRole);
                 keycloak.realm(realm).users().get(adminUserId).roles().realmLevel().add(adminRoles);
                 UserEntity defaultAdmin =
@@ -112,7 +112,7 @@ public class CreateDefaultUser {
                                 .phoneNumber(adminPhoneNumber)
                                 .build();
                 RoleEntity roleEntity = RoleEntity.builder()
-                        .name(Role.admin)
+                        .name(RoleType.admin)
                         .user(defaultAdmin)
                         .build();
                 if (defaultAdmin.getRoles() == null) {

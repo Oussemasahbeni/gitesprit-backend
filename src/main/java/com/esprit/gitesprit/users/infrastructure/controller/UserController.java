@@ -1,6 +1,7 @@
 package com.esprit.gitesprit.users.infrastructure.controller;
 
-import com.esprit.gitesprit.auth.domain.enums.Role;
+import com.esprit.gitesprit.auth.domain.enums.RoleType;
+import com.esprit.gitesprit.users.infrastructure.dto.request.UserRequestDto;
 import com.esprit.gitesprit.cloudstorage.domain.model.Blob;
 import com.esprit.gitesprit.shared.pagination.CustomPage;
 import com.esprit.gitesprit.shared.pagination.PageMapper;
@@ -74,7 +75,7 @@ public class UserController {
             @RequestParam(defaultValue = "id", required = false) String sort,
             @RequestParam(defaultValue = "", required = false) String search,
             @RequestParam(defaultValue = "DESC") String sortDirection,
-            @RequestParam(required = false) Role role) {
+            @RequestParam(required = false) RoleType role) {
         Pageable pageable = PaginationUtils.createPageable(page, size, sort, sortDirection);
 
         Page<UserDto> usersPage =
@@ -103,6 +104,51 @@ public class UserController {
         UUID id = getCurrentAuthenticatedUserId();
         return ResponseEntity.ok(usersUseCases.findCurrentUser(id));
     }
+
+    @DeleteMapping("{id}")
+    @Operation(
+            summary = "Delete user by ID",
+            description = "Delete a user by their unique ID. Only admin users can delete other users.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "User deleted successfully",
+                            content =
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = UserDto.class))),
+                    @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+            })
+    public ResponseEntity<Void> deleteUserById(
+            @Parameter(description = "ID of the user to be deleted", required = true) @PathVariable UUID id) {
+        usersUseCases.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    @Operation(summary = "Create user", description = "Creates a new normal user.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "201",
+                            description = "User created successfully",
+                            content =
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = com.esprit.gitesprit.auth.infra.dto.response.UserDto.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+            })
+
+    @PostMapping()
+    public ResponseEntity<UserDto> createUser(@RequestBody @Valid UserRequestDto userRequestDto) {
+        User authUser = this.usersUseCases.createUser(userRequestDto);
+        return new ResponseEntity<>(userMapper.toUserDto(authUser), HttpStatus.CREATED); // Changed to 201
+    }
+
+
 
     @PatchMapping("/update-profile")
     @Operation(
@@ -197,5 +243,11 @@ public class UserController {
         UUID id = getCurrentAuthenticatedUserId();
         usersUseCases.updateNotificationPreference(id, notificationPreference);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    @GetMapping("/email-exists")
+    public ResponseEntity<Boolean> existsByEmail(@RequestParam String email) {
+        return ResponseEntity.ok(usersUseCases.existsByEmail(email));
     }
 }

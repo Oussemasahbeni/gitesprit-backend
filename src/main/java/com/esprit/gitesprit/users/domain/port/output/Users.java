@@ -1,14 +1,14 @@
 package com.esprit.gitesprit.users.domain.port.output;
 
 import com.esprit.gitesprit.auth.domain.enums.Locale;
-import com.esprit.gitesprit.auth.domain.enums.Role;
-import com.esprit.gitesprit.auth.domain.model.AuthUser;
+import com.esprit.gitesprit.auth.domain.enums.RoleType;
 import com.esprit.gitesprit.users.domain.enums.NotificationPreference;
 import com.esprit.gitesprit.users.domain.model.User;
 import com.esprit.gitesprit.users.infrastructure.dto.request.UpdateProfileRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,7 +16,7 @@ public interface Users {
 
     Optional<User> findById(UUID id);
 
-    void createFromAuthUser(AuthUser user);
+    User create(User user, List<RoleType> roles);
     
     Optional<User> findByEmail(String email);
 
@@ -30,5 +30,7 @@ public interface Users {
 
     void updateLocale(String id, Locale locale);
 
-    Page<User> findAll(String search, Pageable pageable, Role role);
+    Page<User> findAll(String search, Pageable pageable, RoleType roleType);
+
+    Boolean existsByEmail(String email);
 }
