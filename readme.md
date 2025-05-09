@@ -116,6 +116,7 @@ Add the plugin to your `pom.xml` within the `<build><plugins>` section:
     </executions>
 </plugin>
 ```
+omar mseddi
 *Note: I've added a version to `spotless-maven-plugin` and structured the configuration more explicitly. Adjust the version and formatting rules (like Palantir vs Google Java Format) as per your team's standards.*
 
 To apply formatting:
