@@ -46,6 +46,23 @@ public class NotFoundException extends ApplicationException {
                 "error.server.not-found.notification.title",
                 "error.server.not-found.notification.msg",
                 "Notification not found : {0}"),
+        ACADEMIC_YEAR_NOT_FOUND(
+                "error.server.not-found.academic-year.title",
+                "error.server.not-found.academic-year.msg",
+                "Academic Year not found : {0}"
+        ),
+        CLASS_NOT_FOUND(
+                "error.server.not-found.class.title",
+                "error.server.not-found.class.msg",
+                "Class not found : {0}"),
+        SUBJECT_NOT_FOUND(
+                "error.server.not-found.subject.title",
+                "error.server.not-found.subject.msg",
+                "Subject not found : {0}"),
+        GROUP_NOT_FOUND(
+                "error.server.not-found.group.title",
+                "error.server.not-found.group.msg",
+                "Group not found : {0}"),
         LOG_ENTRY_NOT_FOUND(
                 "error.server.not-found.log-entry.title",
                 "error.server.not-found.log-entry.msg",
