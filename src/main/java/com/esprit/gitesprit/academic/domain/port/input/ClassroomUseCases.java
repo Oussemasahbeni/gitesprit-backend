@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ClassroomUseCases {
-    Classroom create(Classroom classroom);
+    Classroom create(Classroom classroom, UUID academicYearId);
 
     Classroom update(Classroom classroom);
 

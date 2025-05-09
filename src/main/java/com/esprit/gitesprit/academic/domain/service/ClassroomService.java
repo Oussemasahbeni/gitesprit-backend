@@ -1,7 +1,9 @@
 package com.esprit.gitesprit.academic.domain.service;
 
+import com.esprit.gitesprit.academic.domain.model.AcademicYear;
 import com.esprit.gitesprit.academic.domain.model.Classroom;
 import com.esprit.gitesprit.academic.domain.model.Subject;
+import com.esprit.gitesprit.academic.domain.port.input.AcademicYearUseCases;
 import com.esprit.gitesprit.academic.domain.port.input.ClassroomUseCases;
 import com.esprit.gitesprit.academic.domain.port.input.SubjectUseCases;
 import com.esprit.gitesprit.academic.domain.port.output.Classrooms;
@@ -22,9 +24,12 @@ public class ClassroomService implements ClassroomUseCases {
     private final Classrooms classrooms;
     private final SubjectUseCases subjectUseCases;
     private final Subjects subjects;
+    private final AcademicYearUseCases academicYearUseCases;
 
     @Override
-    public Classroom create(Classroom classroom) {
+    public Classroom create(Classroom classroom, UUID academicYearId) {
+        AcademicYear academicYear = academicYearUseCases.findById(academicYearId);
+        classroom.setAcademicYear(academicYear);
         return classrooms.create(classroom);
     }
 

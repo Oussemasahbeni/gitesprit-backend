@@ -1,14 +1,13 @@
 package com.esprit.gitesprit.academic.domain.port.input;
 
 import com.esprit.gitesprit.academic.domain.model.Subject;
-import org.springframework.data.domain.Page;
-
-import java.awt.print.Pageable;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface SubjectUseCases {
-    Subject create(Subject subject);
+    Subject create(Subject subject, UUID teacherId, UUID classroomId);
 
     Subject update(Subject subject);
 

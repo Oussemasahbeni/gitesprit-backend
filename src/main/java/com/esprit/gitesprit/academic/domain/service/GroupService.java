@@ -1,6 +1,7 @@
 package com.esprit.gitesprit.academic.domain.service;
 
 import com.esprit.gitesprit.academic.domain.model.Group;
+import com.esprit.gitesprit.academic.domain.model.Subject;
 import com.esprit.gitesprit.academic.domain.port.input.GroupUseCases;
 import com.esprit.gitesprit.academic.domain.port.input.SubjectUseCases;
 import com.esprit.gitesprit.academic.domain.port.output.Groups;
@@ -23,11 +24,13 @@ public class GroupService implements GroupUseCases {
     private final Groups groups;
     private final UserUseCases userUseCases;
 //    private final Users users;
-//    private final SubjectUseCases subjectUseCases;
+    private final SubjectUseCases subjectUseCases;
     private final Subjects subjects;
 
     @Override
-    public Group create(Group group) {
+    public Group create(Group group, UUID subjectId) {
+        Subject subject = subjectUseCases.findById(subjectId);
+        group.setSubject(subject);
         return groups.create(group);
     }
 

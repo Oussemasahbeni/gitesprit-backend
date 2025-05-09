@@ -1,5 +1,6 @@
 package com.esprit.gitesprit.academic.domain.service;
 
+import com.esprit.gitesprit.academic.domain.model.Classroom;
 import com.esprit.gitesprit.academic.domain.model.Group;
 import com.esprit.gitesprit.academic.domain.model.Subject;
 import com.esprit.gitesprit.academic.domain.port.input.ClassroomUseCases;
@@ -10,13 +11,13 @@ import com.esprit.gitesprit.academic.domain.port.output.Groups;
 import com.esprit.gitesprit.academic.domain.port.output.Subjects;
 import com.esprit.gitesprit.exception.NotFoundException;
 import com.esprit.gitesprit.shared.annotation.DomainService;
+import com.esprit.gitesprit.users.domain.model.User;
 import com.esprit.gitesprit.users.domain.port.input.UserUseCases;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-
-import java.awt.print.Pageable;
 import java.util.List;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @DomainService
 @RequiredArgsConstructor
@@ -26,10 +27,13 @@ public class SubjectService implements SubjectUseCases {
     private final GroupUseCases groupUseCases;
     private final Groups groups;
     private final ClassroomUseCases classroomUseCases;
-    private final Classrooms classrooms;
 
     @Override
-    public Subject create(Subject subject) {
+    public Subject create(Subject subject, UUID teacherId, UUID classroomId) {
+        User teacher = userUseCases.findById(teacherId);
+        Classroom classroom = classroomUseCases.findById(classroomId);
+        subject.setTeacher(teacher);
+        subject.setClassroom(classroom);
         return subjects.create(subject);
     }
 

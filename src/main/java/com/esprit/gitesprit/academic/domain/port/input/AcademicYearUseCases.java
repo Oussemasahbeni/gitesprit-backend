@@ -2,8 +2,6 @@ package com.esprit.gitesprit.academic.domain.port.input;
 
 import com.esprit.gitesprit.academic.domain.model.AcademicYear;
 import com.esprit.gitesprit.academic.domain.model.Classroom;
-import com.esprit.gitesprit.auth.domain.enums.RoleType;
-import com.esprit.gitesprit.users.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

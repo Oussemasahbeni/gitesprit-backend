@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface GroupUseCases {
-    Group create(Group group);
+    Group create(Group group, UUID subjectId);
 
     Group update(Group group);
 

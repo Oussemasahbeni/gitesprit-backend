@@ -1,7 +1,6 @@
 package com.esprit.gitesprit.academic.domain.port.output;
 
 import com.esprit.gitesprit.academic.domain.model.AcademicYear;
-import com.esprit.gitesprit.academic.domain.model.Classroom;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -12,10 +11,6 @@ public interface AcademicYears {
     AcademicYear create(AcademicYear academicYear);
 
     AcademicYear update(AcademicYear academicYear);
-
-    AcademicYear assignClass(AcademicYear academicYear, Classroom classroom);
-
-    Classroom removeClass(UUID academicYearId, UUID classroomId);
 
     Optional<AcademicYear> findById(UUID id);
 

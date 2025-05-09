@@ -12,12 +12,6 @@ public interface Groups {
 
     Group update(Group group);
 
-    Group assignStudent(Group group, UUID student);
-
-    Group removeStudent(UUID groupId, UUID student);
-
-    Group assignStudents(Group group, List<UUID> students);
-
     Optional<Group> findById(UUID id);
 
     void deleteById(UUID id);
