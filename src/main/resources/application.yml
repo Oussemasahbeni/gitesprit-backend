@@ -82,10 +82,9 @@ spring:
 
 keycloak:
   realm: ${KEYCLOAK_REALM}
-  client: ${KEYCLOAK_CLIENT_ID}
-  url: ${KEYCLOAK_URL}
-  credentials:
-    secret: ${KEYCLOAK_CLIENT_SECRET}
+  client-id: ${KEYCLOAK_CLIENT_ID}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}
+  server-url: ${KEYCLOAK_URL}
 
 
 application:
@@ -112,11 +111,11 @@ springdoc:
     path: /docs
     operationsSorter: method
     display-request-duration: true
-    oauth:
-      client-id: ${KEYCLOAK_CLIENT_ID}
-      client-secret: ${KEYCLOAK_CLIENT_SECRET}
-      scopes: openid profile
-    oauth2-redirect-url: ${application.backend-url}/swagger-ui/oauth2-redirect.html
+#    oauth:
+#      client-id: ${KEYCLOAK_CLIENT_ID}
+#      client-secret: ${KEYCLOAK_CLIENT_SECRET}
+#      scopes: openid profile
+#    oauth2-redirect-url: ${application.backend-url}/swagger-ui/oauth2-redirect.html
   default-produces-media-type: application/json
 
 server:
