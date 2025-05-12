@@ -5,14 +5,14 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.4</version>
+        <version>3.4.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.inspark</groupId>
-    <artifactId>agriculture</artifactId>
+    <groupId>com.esprit</groupId>
+    <artifactId>gitesprit</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>agriculture</name>
-    <description>A backend project for the Ministry of Agriculture</description>
+    <name>gitesprit</name>
+    <description>A backend project for the Git Esprit</description>
     <url/>
     <licenses>
         <license/>
@@ -30,11 +30,12 @@
         <java.version>21</java.version>
         <spring-cloud-azure.version>5.22.0</spring-cloud-azure.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
-        <springdoc-openapi.version>2.8.6</springdoc-openapi.version>
+        <springdoc-openapi.version>2.8.8</springdoc-openapi.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
         <keycloak-client.version>26.0.5</keycloak-client.version>
         <spotless.version>7.0.3</spotless.version>
         <java-faker.version>2.4.3</java-faker.version>
+        <spring-ai.version>1.0.0-M8</spring-ai.version>
     </properties>
     <dependencies>
 
@@ -49,6 +50,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.retry</groupId>
@@ -159,6 +164,14 @@
                 <groupId>com.azure.spring</groupId>
                 <artifactId>spring-cloud-azure-dependencies</artifactId>
                 <version>${spring-cloud-azure.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

@@ -43,7 +43,7 @@ public class KeycloakUserAdapter implements IdentityProvider {
     @Value("${keycloak.realm}")
     public String realm;
 
-    @Value("${application.frontend.url}")
+    @Value("${application.frontend-url}")
     public String frontendUrl;
 
     @Override

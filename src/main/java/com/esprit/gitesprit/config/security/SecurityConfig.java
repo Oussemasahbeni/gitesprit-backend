@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request.requestMatchers(AUTH_WHITE_LIST)
                         .permitAll()
                         .anyRequest()
-                        .authenticated())
+                        .permitAll())
                 .oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(token -> token.jwtAuthenticationConverter(new KeycloakJwtAuthenticationConverter())))
                 .addFilterAfter(new RequestLoggingFilter(), UsernamePasswordAuthenticationFilter.class)
