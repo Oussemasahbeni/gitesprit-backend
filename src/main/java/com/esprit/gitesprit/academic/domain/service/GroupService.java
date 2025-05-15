@@ -9,7 +9,6 @@ import com.esprit.gitesprit.academic.domain.port.output.Subjects;
 import com.esprit.gitesprit.exception.NotFoundException;
 import com.esprit.gitesprit.shared.annotation.DomainService;
 import com.esprit.gitesprit.users.domain.model.User;
-import com.esprit.gitesprit.users.domain.port.input.UserUseCases;
 import com.esprit.gitesprit.users.domain.port.output.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,14 +21,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class GroupService implements GroupUseCases {
     private final Groups groups;
-    private final UserUseCases userUseCases;
-//    private final Users users;
-    private final SubjectUseCases subjectUseCases;
+    private final Users users;
     private final Subjects subjects;
 
     @Override
     public Group create(Group group, UUID subjectId) {
-        Subject subject = subjectUseCases.findById(subjectId);
+        Subject subject = subjects.findById(subjectId).orElseThrow(
+                () -> new NotFoundException(NotFoundException.NotFoundExceptionType.SUBJECT_NOT_FOUND)
+        );
         group.setSubject(subject);
         return groups.create(group);
     }
@@ -43,7 +42,9 @@ public class GroupService implements GroupUseCases {
     @Override
     public Group assignStudent(UUID groupId, UUID studentId) {
         Group group = findById(groupId);
-        User student = userUseCases.findById(studentId);
+        User student = users.findById(studentId).orElseThrow(
+                () -> new NotFoundException(NotFoundException.NotFoundExceptionType.USER_NOT_FOUND)
+        );
         if (group.getStudents().contains(student)) {
             return group;
         }
@@ -55,7 +56,9 @@ public class GroupService implements GroupUseCases {
     @Override
     public Group removeStudent(UUID groupId, UUID studentId) {
         Group group = findById(groupId);
-        User student = userUseCases.findById(studentId);
+        User student = users.findById(studentId).orElseThrow(
+                () -> new NotFoundException(NotFoundException.NotFoundExceptionType.USER_NOT_FOUND)
+        );
         if (!checkStudentInGroup(group, studentId)) {
             return group;
         }
@@ -68,7 +71,9 @@ public class GroupService implements GroupUseCases {
     public Group assignStudents(UUID groupId, List<UUID> studentIds) {
         Group group = findById(groupId);
         for (UUID studentId : studentIds) {
-            User student = userUseCases.findById(studentId);
+            User student = users.findById(studentId).orElseThrow(
+                    () -> new NotFoundException(NotFoundException.NotFoundExceptionType.USER_NOT_FOUND)
+            );
             if (!group.getStudents().contains(student)) {
                 group.addStudent(student);
             }

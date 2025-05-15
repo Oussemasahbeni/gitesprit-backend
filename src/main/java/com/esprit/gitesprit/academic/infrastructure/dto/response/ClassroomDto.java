@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-/** DTO for {@link com.esprit.gitesprit.academic.infrastructure.entity.ClassroomEntity} */
 public record ClassroomDto(
         String createdBy,
         String lastModifiedBy,
@@ -14,6 +13,6 @@ public record ClassroomDto(
         Short version,
         UUID id,
         String name,
-        AcademicYearDto academicYear,
+        //AcademicYearDto academicYear,
         List<SubjectEntityDto> subjects)
     implements Serializable {}

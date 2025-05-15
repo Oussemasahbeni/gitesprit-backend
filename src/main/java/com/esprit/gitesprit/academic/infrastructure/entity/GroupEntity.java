@@ -2,6 +2,8 @@ package com.esprit.gitesprit.academic.infrastructure.entity;
 
 import com.esprit.gitesprit.shared.AbstractAuditingEntity;
 import com.esprit.gitesprit.users.infrastructure.entity.UserEntity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,6 +32,7 @@ public class GroupEntity extends AbstractAuditingEntity {
 
     @ManyToOne
     @JoinColumn(name = "subject_id", nullable = false)
+    @JsonBackReference
     private SubjectEntity subject;
 
     @ManyToMany
@@ -38,5 +41,6 @@ public class GroupEntity extends AbstractAuditingEntity {
             joinColumns = @JoinColumn(name = "group_id"),
             inverseJoinColumns = @JoinColumn(name = "student_id")
     )
+    @JsonManagedReference
     private Set<UserEntity> students = new HashSet<>();
 }

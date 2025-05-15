@@ -2,6 +2,7 @@ package com.esprit.gitesprit.academic.infrastructure.adapter.persistence;
 
 import com.esprit.gitesprit.academic.domain.model.Classroom;
 import com.esprit.gitesprit.academic.domain.port.output.Classrooms;
+import com.esprit.gitesprit.academic.infrastructure.adapter.specification.ClassroomSpecification;
 import com.esprit.gitesprit.academic.infrastructure.entity.ClassroomEntity;
 import com.esprit.gitesprit.academic.infrastructure.entity.ClassroomEntity;
 import com.esprit.gitesprit.academic.infrastructure.entity.ClassroomEntity;
@@ -12,11 +13,14 @@ import com.esprit.gitesprit.shared.annotation.PersistenceAdapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.esprit.gitesprit.academic.infrastructure.adapter.specification.ClassroomSpecification.*;
 
 @PersistenceAdapter
 @RequiredArgsConstructor
@@ -72,6 +76,7 @@ public class ClassroomJpaAdapter implements Classrooms {
 
     @Override
     public Page<Classroom> findAllPaginated(String search, Pageable pageable) {
-        return null;
+        Specification<ClassroomEntity> spec = hasCriteria(search);
+        return classroomRepository.findAll(spec, pageable).map(classroomMapper::toModel);
     }
 }

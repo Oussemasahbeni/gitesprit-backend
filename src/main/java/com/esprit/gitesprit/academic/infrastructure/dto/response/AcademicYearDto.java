@@ -1,6 +1,5 @@
 package com.esprit.gitesprit.academic.infrastructure.dto.response;
 
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;

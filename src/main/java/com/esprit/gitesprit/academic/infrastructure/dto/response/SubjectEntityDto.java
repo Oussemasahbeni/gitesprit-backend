@@ -7,7 +7,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-/** DTO for {@link com.esprit.gitesprit.academic.infrastructure.entity.SubjectEntity} */
 public record SubjectEntityDto(
         String createdBy,
         String lastModifiedBy,
@@ -16,7 +15,6 @@ public record SubjectEntityDto(
         Short version,
         UUID id,
         String name,
-        ClassroomDto classroom,
         UserDto teacher,
         List<GroupEntityDto> groups)
     implements Serializable {}

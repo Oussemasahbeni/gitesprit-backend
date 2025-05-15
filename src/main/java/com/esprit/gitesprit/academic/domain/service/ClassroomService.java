@@ -6,6 +6,7 @@ import com.esprit.gitesprit.academic.domain.model.Subject;
 import com.esprit.gitesprit.academic.domain.port.input.AcademicYearUseCases;
 import com.esprit.gitesprit.academic.domain.port.input.ClassroomUseCases;
 import com.esprit.gitesprit.academic.domain.port.input.SubjectUseCases;
+import com.esprit.gitesprit.academic.domain.port.output.AcademicYears;
 import com.esprit.gitesprit.academic.domain.port.output.Classrooms;
 import com.esprit.gitesprit.academic.domain.port.output.Subjects;
 import com.esprit.gitesprit.exception.NotFoundException;
@@ -22,13 +23,14 @@ import java.util.UUID;
 public class ClassroomService implements ClassroomUseCases {
 
     private final Classrooms classrooms;
-    private final SubjectUseCases subjectUseCases;
     private final Subjects subjects;
-    private final AcademicYearUseCases academicYearUseCases;
+    private final AcademicYears academicYears;
 
     @Override
     public Classroom create(Classroom classroom, UUID academicYearId) {
-        AcademicYear academicYear = academicYearUseCases.findById(academicYearId);
+        AcademicYear academicYear = academicYears.findById(academicYearId).orElseThrow(
+                () -> new NotFoundException(NotFoundException.NotFoundExceptionType.ACADEMIC_YEAR_NOT_FOUND)
+        );
         classroom.setAcademicYear(academicYear);
         return classrooms.create(classroom);
     }
@@ -54,7 +56,9 @@ public class ClassroomService implements ClassroomUseCases {
     @Override
     public Classroom removeSubject(UUID classroomId, UUID subjectId) {
         Classroom classroom = findById(classroomId);
-        Subject subject = subjectUseCases.findById(subjectId);
+        Subject subject = subjects.findById(subjectId).orElseThrow(
+                () -> new NotFoundException(NotFoundException.NotFoundExceptionType.SUBJECT_NOT_FOUND)
+        );
         if (!checkSubjectInClassroom(classroom, subjectId)) {
             return classroom;
         }

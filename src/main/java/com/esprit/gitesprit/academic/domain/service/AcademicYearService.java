@@ -3,7 +3,6 @@ package com.esprit.gitesprit.academic.domain.service;
 import com.esprit.gitesprit.academic.domain.model.AcademicYear;
 import com.esprit.gitesprit.academic.domain.model.Classroom;
 import com.esprit.gitesprit.academic.domain.port.input.AcademicYearUseCases;
-import com.esprit.gitesprit.academic.domain.port.input.ClassroomUseCases;
 import com.esprit.gitesprit.academic.domain.port.output.AcademicYears;
 import com.esprit.gitesprit.academic.domain.port.output.Classrooms;
 import com.esprit.gitesprit.exception.NotFoundException;
@@ -20,7 +19,6 @@ import java.util.UUID;
 public class AcademicYearService implements AcademicYearUseCases {
 
     private final AcademicYears academicYears;
-    private final ClassroomUseCases classroomUseCases;
     private final Classrooms classrooms;
 
     @Override
@@ -49,7 +47,9 @@ public class AcademicYearService implements AcademicYearUseCases {
     @Override
     public AcademicYear removeClass(UUID academicYearId, UUID classroomId) {
         AcademicYear academicYear = findById(academicYearId);
-        Classroom classroom = classroomUseCases.findById(classroomId);
+        Classroom classroom = classrooms.findById(classroomId).orElseThrow(
+                () -> new NotFoundException(NotFoundException.NotFoundExceptionType.CLASS_NOT_FOUND)
+        );
         if (!checkClassInAcademicYear(academicYear, classroomId)) {
             return academicYear;
         }
@@ -81,8 +81,8 @@ public class AcademicYearService implements AcademicYearUseCases {
     }
 
     @Override
-    public Page<AcademicYear> findAllPaginated(String search, Pageable pageable) {
-        return academicYears.findAllPaginated(search, pageable);
+    public Page<AcademicYear> findAllPaginated(Pageable pageable) {
+        return academicYears.findAllPaginated(pageable);
     }
 
     private boolean checkClassInAcademicYear(AcademicYear academicYear, UUID classroomId) {

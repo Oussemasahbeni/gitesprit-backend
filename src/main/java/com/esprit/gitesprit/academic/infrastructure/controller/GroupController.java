@@ -1,3 +1,101 @@
 package com.esprit.gitesprit.academic.infrastructure.controller;
 
-public class GroupController {}
+import com.esprit.gitesprit.academic.domain.model.Group;
+import com.esprit.gitesprit.academic.domain.port.input.GroupUseCases;
+import com.esprit.gitesprit.academic.infrastructure.dto.request.AddGroupDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.GroupEntityDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.GroupEntityDto;
+import com.esprit.gitesprit.academic.infrastructure.mapper.GroupMapper;
+import com.esprit.gitesprit.shared.pagination.CustomPage;
+import com.esprit.gitesprit.shared.pagination.PageMapper;
+import com.esprit.gitesprit.shared.pagination.PaginationUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/v1/groups")
+@Tag(name = "Groups", description = "API for managing groups")
+@RequiredArgsConstructor
+public class GroupController {
+    private final GroupUseCases groupUseCases;
+    private final GroupMapper groupMapper;
+
+    @PostMapping
+    public ResponseEntity<GroupEntityDto> create(@RequestBody @Valid AddGroupDto dto){
+        Group group = groupMapper.toModelFromDto(dto);
+        Group savedGroup = groupUseCases.create(group, dto.subjectId());
+        return ResponseEntity.ok(groupMapper.toResponseDto(savedGroup));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<GroupEntityDto> findById(@PathVariable UUID id){
+        Group group = groupUseCases.findById(id);
+        GroupEntityDto groupDto = groupMapper.toResponseDto(group);
+        return ResponseEntity.ok(groupDto);
+    }
+
+    @GetMapping
+    @Operation(
+            summary = "Get all Groups paginated",
+            description = "Retrieves Groups with pagination, search, and sorting.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Successful retrieval",
+                            content =
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = CustomPage.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid pagination parameters", content = @Content),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+            })
+    public ResponseEntity<CustomPage<GroupEntityDto>> findAllPaginated(
+            @Parameter(description = "Page size", example = "10") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Search term") @RequestParam(defaultValue = "") String search,
+            @Parameter(description = "Page number (starting from 0)", example = "0") @RequestParam(defaultValue = "0")
+            int page,
+            @Parameter(description = "Sort field", example = "id") @RequestParam(defaultValue = "id", required = false)
+            String sort,
+            @Parameter(description = "Sort direction (ASC or DESC)", example = "ASC")
+            @RequestParam(defaultValue = "ASC")
+            String sortDirection) {
+        Pageable pageable = PaginationUtils.createPageable(page, size, sort, sortDirection);
+        Page<GroupEntityDto> groups =
+                groupUseCases.findAllPaginated(search, pageable).map(groupMapper::toResponseDto);
+        return ResponseEntity.ok(PageMapper.toCustomPage(groups));
+    }
+
+    @GetMapping("/all")
+    @Operation(summary = "Get all Groups", description = "Retrieves a list of all Groups without pagination.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Successful retrieval",
+                            content =
+                            @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = GroupEntityDto.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+            })
+    public ResponseEntity<List<GroupEntityDto>> findAll() {
+        List<GroupEntityDto> groups = groupUseCases.findAll().stream().map(groupMapper::toResponseDto).toList();
+        return ResponseEntity.ok(groups);
+    }
+}

@@ -67,7 +67,8 @@ public class AcademicYearJpaAdapter implements AcademicYears {
     }
 
     @Override
-    public Page<AcademicYear> findAllPaginated(String search, Pageable pageable) {
-        return null;
+    public Page<AcademicYear> findAllPaginated(Pageable pageable) {
+        Page<AcademicYearEntity> academicYearEntities = academicYearRepository.findAll(pageable);
+        return academicYearEntities.map(academicYearMapper::toModel);
     }
 }

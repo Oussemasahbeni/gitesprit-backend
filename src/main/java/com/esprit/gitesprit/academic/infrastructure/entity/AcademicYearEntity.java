@@ -1,6 +1,7 @@
 package com.esprit.gitesprit.academic.infrastructure.entity;
 
 import com.esprit.gitesprit.shared.AbstractAuditingEntity;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,5 +32,6 @@ public class AcademicYearEntity extends AbstractAuditingEntity {
     private int endYear;
 
     @OneToMany(mappedBy = "academicYear", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private Set<ClassroomEntity> classrooms = new HashSet<>();
 }

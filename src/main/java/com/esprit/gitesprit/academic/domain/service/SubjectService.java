@@ -3,8 +3,6 @@ package com.esprit.gitesprit.academic.domain.service;
 import com.esprit.gitesprit.academic.domain.model.Classroom;
 import com.esprit.gitesprit.academic.domain.model.Group;
 import com.esprit.gitesprit.academic.domain.model.Subject;
-import com.esprit.gitesprit.academic.domain.port.input.ClassroomUseCases;
-import com.esprit.gitesprit.academic.domain.port.input.GroupUseCases;
 import com.esprit.gitesprit.academic.domain.port.input.SubjectUseCases;
 import com.esprit.gitesprit.academic.domain.port.output.Classrooms;
 import com.esprit.gitesprit.academic.domain.port.output.Groups;
@@ -12,9 +10,11 @@ import com.esprit.gitesprit.academic.domain.port.output.Subjects;
 import com.esprit.gitesprit.exception.NotFoundException;
 import com.esprit.gitesprit.shared.annotation.DomainService;
 import com.esprit.gitesprit.users.domain.model.User;
-import com.esprit.gitesprit.users.domain.port.input.UserUseCases;
+
 import java.util.List;
 import java.util.UUID;
+
+import com.esprit.gitesprit.users.domain.port.output.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,15 +23,18 @@ import org.springframework.data.domain.Pageable;
 @RequiredArgsConstructor
 public class SubjectService implements SubjectUseCases {
     private final Subjects subjects;
-    private final UserUseCases userUseCases;
-    private final GroupUseCases groupUseCases;
+    private final Users users;
     private final Groups groups;
-    private final ClassroomUseCases classroomUseCases;
+    private final Classrooms classrooms;
 
     @Override
     public Subject create(Subject subject, UUID teacherId, UUID classroomId) {
-        User teacher = userUseCases.findById(teacherId);
-        Classroom classroom = classroomUseCases.findById(classroomId);
+        User teacher = users.findById(teacherId).orElseThrow(
+                () -> new NotFoundException(NotFoundException.NotFoundExceptionType.USER_NOT_FOUND)
+        );
+        Classroom classroom = classrooms.findById(classroomId).orElseThrow(
+                () -> new NotFoundException(NotFoundException.NotFoundExceptionType.CLASS_NOT_FOUND)
+        );
         subject.setTeacher(teacher);
         subject.setClassroom(classroom);
         return subjects.create(subject);
@@ -46,7 +49,9 @@ public class SubjectService implements SubjectUseCases {
     @Override
     public Subject assignGroup(UUID subjectId, UUID groupId) {
         Subject subject = findById(subjectId);
-        Group group = groupUseCases.findById(groupId);
+        Group group = groups.findById(groupId).orElseThrow(
+                () -> new NotFoundException(NotFoundException.NotFoundExceptionType.GROUP_NOT_FOUND)
+        );
         if (subject.getGroups().contains(group)) {
             return subject;
         }
@@ -59,7 +64,9 @@ public class SubjectService implements SubjectUseCases {
     @Override
     public Subject removeGroup(UUID subjectId, UUID groupId) {
         Subject subject = findById(subjectId);
-        Group group = groupUseCases.findById(groupId);
+        Group group = groups.findById(groupId).orElseThrow(
+                () -> new NotFoundException(NotFoundException.NotFoundExceptionType.GROUP_NOT_FOUND)
+        );
         if (!checkGroupInSubject(subject, groupId)) {
             return subject;
         }
@@ -73,7 +80,9 @@ public class SubjectService implements SubjectUseCases {
     public Subject assignGroups(UUID subjectId, List<UUID> groupIds) {
         Subject subject = findById(subjectId);
         for (UUID groupId : groupIds) {
-            Group group = groupUseCases.findById(groupId);
+            Group group = groups.findById(groupId).orElseThrow(
+                    () -> new NotFoundException(NotFoundException.NotFoundExceptionType.GROUP_NOT_FOUND)
+            );
             if (!subject.getGroups().contains(group)) {
                 group.setSubject(subject);
                 subject.addGroup(group);

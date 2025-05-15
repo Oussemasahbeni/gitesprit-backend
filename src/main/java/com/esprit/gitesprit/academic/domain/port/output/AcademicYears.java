@@ -20,5 +20,5 @@ public interface AcademicYears {
 
     List<AcademicYear> findAll();
 
-    Page<AcademicYear> findAllPaginated(String search, Pageable pageable);
+    Page<AcademicYear> findAllPaginated(Pageable pageable);
 }
