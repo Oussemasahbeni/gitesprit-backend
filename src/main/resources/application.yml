@@ -1,8 +1,16 @@
 spring:
   profiles:
     active: prod
+  cloud:
+      azure:
+        storage:
+          blob:
+            account-name: ${AZURE_ACCOUNT_NAME}
+            account-key: ${AZURE_ACCOUNT_KEY}
+            connection-string: ${AZURE_CONNECTION_STRING}
+            endpoint: ${AZURE_ENDPOINT}
   application:
-    name: gitesprit
+    name: git-esprit
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -74,7 +82,6 @@ spring:
         completions-path: /v1beta/openai/chat/completions
         options:
           model: gemini-2.5-flash-preview-04-17
-
   threads:
     virtual:
       enabled: true
@@ -85,7 +92,6 @@ keycloak:
   client-id: ${KEYCLOAK_CLIENT_ID}
   client-secret: ${KEYCLOAK_CLIENT_SECRET}
   server-url: ${KEYCLOAK_URL}
-
 
 application:
   frontend-url: ${FRONTEND_URL}
@@ -125,19 +131,26 @@ logging:
   level:
     org.springframework.security: DEBUG
 
-#management:
-#  metrics:
-#    distribution:
-#      percentiles-histogram:
-#        http.server.requests: true
-#  endpoints:
-#    web:
-#      exposure:
-#        include: health,prometheus
-#  endpoint:
-#    health:
-#      show-details: always
-#  prometheus:
-#    metrics:
-#      export:
-#        enabled: true
+
+management:
+  metrics:
+    distribution:
+      percentiles-histogram:
+        all: true
+    enable:
+        all: true
+  endpoints:
+    web:
+      exposure:
+        include: info,health,prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+    enabled: true

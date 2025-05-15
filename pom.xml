@@ -37,6 +37,7 @@
         <spotless.version>7.0.3</spotless.version>
         <java-faker.version>2.4.3</java-faker.version>
         <spring-ai.version>1.0.0-M8</spring-ai.version>
+        <loki-logback-appender.version>1.6.0</loki-logback-appender.version>
     </properties>
     <dependencies>
 
@@ -84,7 +85,21 @@
             <groupId>com.azure.spring</groupId>
             <artifactId>spring-cloud-azure-starter-storage</artifactId>
         </dependency>
-
+        <!-- Observablity-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.loki4j</groupId>
+            <artifactId>loki-logback-appender</artifactId>
+            <version>${loki-logback-appender.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
