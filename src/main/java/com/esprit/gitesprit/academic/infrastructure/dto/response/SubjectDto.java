@@ -1,10 +1,12 @@
 package com.esprit.gitesprit.academic.infrastructure.dto.response;
 
+import com.esprit.gitesprit.auth.infra.dto.response.UserDto;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-public record ClassroomDto(
+public record SubjectDto(
         String createdBy,
         String lastModifiedBy,
         Instant createdAt,
@@ -12,6 +14,7 @@ public record ClassroomDto(
         Short version,
         UUID id,
         String name,
-        AcademicYearSimpleDto academicYear,
-        List<SubjectSimpleDto> subjects
+        UserDto teacher,
+        ClassroomSimpleDto classroom,
+        List<GroupSimpleDto> groups
 ) {}

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.UUID;
 
 /** Interface defining the use cases for managing users. */
@@ -48,6 +49,8 @@ public interface UserUseCases {
     User findCurrentUser(UUID id);
 
     Page<User> findAllPaginated(String search, RoleType roleType, Pageable pageable);
+
+    List<User> findAllByRole(RoleType roleType);
 
     User createUser(UserRequestDto authUser);
 

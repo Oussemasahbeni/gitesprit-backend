@@ -3,6 +3,7 @@ package com.esprit.gitesprit.academic.infrastructure.mapper;
 import com.esprit.gitesprit.academic.domain.model.AcademicYear;
 import com.esprit.gitesprit.academic.infrastructure.dto.request.AddAcademicYearDto;
 import com.esprit.gitesprit.academic.infrastructure.dto.response.AcademicYearDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.AcademicYearSimpleDto;
 import com.esprit.gitesprit.academic.infrastructure.entity.AcademicYearEntity;
 import com.esprit.gitesprit.shared.mapstruct.CycleAvoidingMappingContext;
 import com.esprit.gitesprit.shared.mapstruct.DoIgnore;
@@ -33,4 +34,6 @@ public interface AcademicYearMapper {
     //AcademicYear toModelFromUpdateDto( academicYearDto);
 
     AcademicYearDto toResponseDto(AcademicYear academicYear);
+
+    AcademicYearSimpleDto toSimpleDto(AcademicYear academicYear);
 }

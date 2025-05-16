@@ -30,6 +30,8 @@ public interface Users {
 
     void updateLocale(String id, Locale locale);
 
+    List<User> findAllByRole(RoleType roleType);
+
     Page<User> findAll(String search, Pageable pageable, RoleType roleType);
 
     Boolean existsByEmail(String email);

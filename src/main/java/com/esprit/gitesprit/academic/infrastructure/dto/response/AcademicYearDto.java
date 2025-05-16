@@ -13,4 +13,4 @@ public record AcademicYearDto(
         UUID id,
         int startYear,
         int endYear,
-        Set<ClassroomDto> classrooms){}
+        Set<ClassroomSimpleDto> classrooms){}

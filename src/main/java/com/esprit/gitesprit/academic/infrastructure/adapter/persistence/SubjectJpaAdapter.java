@@ -2,6 +2,7 @@ package com.esprit.gitesprit.academic.infrastructure.adapter.persistence;
 
 import com.esprit.gitesprit.academic.domain.model.Subject;
 import com.esprit.gitesprit.academic.domain.port.output.Subjects;
+import com.esprit.gitesprit.academic.infrastructure.adapter.specification.SubjectSpecification;
 import com.esprit.gitesprit.academic.infrastructure.entity.SubjectEntity;
 import com.esprit.gitesprit.academic.infrastructure.mapper.SubjectMapper;
 import com.esprit.gitesprit.academic.infrastructure.repository.SubjectRepository;
@@ -10,6 +11,7 @@ import com.esprit.gitesprit.shared.annotation.PersistenceAdapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -68,7 +70,8 @@ public class SubjectJpaAdapter implements Subjects {
 
     @Override
     public Page<Subject> findAllPaginated(String search, Pageable pageable) {
-        return null;
+        Specification<SubjectEntity> spec = SubjectSpecification.hasCriteria(search);
+        return subjectRepository.findAll(spec, pageable).map(subjectMapper::toModel);
     }
 }
 

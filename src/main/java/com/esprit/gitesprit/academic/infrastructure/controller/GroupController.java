@@ -3,8 +3,8 @@ package com.esprit.gitesprit.academic.infrastructure.controller;
 import com.esprit.gitesprit.academic.domain.model.Group;
 import com.esprit.gitesprit.academic.domain.port.input.GroupUseCases;
 import com.esprit.gitesprit.academic.infrastructure.dto.request.AddGroupDto;
-import com.esprit.gitesprit.academic.infrastructure.dto.response.GroupEntityDto;
-import com.esprit.gitesprit.academic.infrastructure.dto.response.GroupEntityDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.GroupDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.GroupSimpleDto;
 import com.esprit.gitesprit.academic.infrastructure.mapper.GroupMapper;
 import com.esprit.gitesprit.shared.pagination.CustomPage;
 import com.esprit.gitesprit.shared.pagination.PageMapper;
@@ -36,16 +36,16 @@ public class GroupController {
     private final GroupMapper groupMapper;
 
     @PostMapping
-    public ResponseEntity<GroupEntityDto> create(@RequestBody @Valid AddGroupDto dto){
+    public ResponseEntity<GroupSimpleDto> create(@RequestBody @Valid AddGroupDto dto){
         Group group = groupMapper.toModelFromDto(dto);
         Group savedGroup = groupUseCases.create(group, dto.subjectId());
-        return ResponseEntity.ok(groupMapper.toResponseDto(savedGroup));
+        return ResponseEntity.ok(groupMapper.toSimpleDto(savedGroup));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GroupEntityDto> findById(@PathVariable UUID id){
+    public ResponseEntity<GroupDto> findById(@PathVariable UUID id){
         Group group = groupUseCases.findById(id);
-        GroupEntityDto groupDto = groupMapper.toResponseDto(group);
+        GroupDto groupDto = groupMapper.toResponseDto(group);
         return ResponseEntity.ok(groupDto);
     }
 
@@ -65,7 +65,7 @@ public class GroupController {
                     @ApiResponse(responseCode = "400", description = "Invalid pagination parameters", content = @Content),
                     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
             })
-    public ResponseEntity<CustomPage<GroupEntityDto>> findAllPaginated(
+    public ResponseEntity<CustomPage<GroupDto>> findAllPaginated(
             @Parameter(description = "Page size", example = "10") @RequestParam(defaultValue = "10") int size,
             @Parameter(description = "Search term") @RequestParam(defaultValue = "") String search,
             @Parameter(description = "Page number (starting from 0)", example = "0") @RequestParam(defaultValue = "0")
@@ -76,7 +76,7 @@ public class GroupController {
             @RequestParam(defaultValue = "ASC")
             String sortDirection) {
         Pageable pageable = PaginationUtils.createPageable(page, size, sort, sortDirection);
-        Page<GroupEntityDto> groups =
+        Page<GroupDto> groups =
                 groupUseCases.findAllPaginated(search, pageable).map(groupMapper::toResponseDto);
         return ResponseEntity.ok(PageMapper.toCustomPage(groups));
     }
@@ -91,11 +91,11 @@ public class GroupController {
                             content =
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = GroupEntityDto.class))),
+                                    schema = @Schema(implementation = GroupSimpleDto.class))),
                     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
             })
-    public ResponseEntity<List<GroupEntityDto>> findAll() {
-        List<GroupEntityDto> groups = groupUseCases.findAll().stream().map(groupMapper::toResponseDto).toList();
+    public ResponseEntity<List<GroupDto>> findAll() {
+        List<GroupDto> groups = groupUseCases.findAll().stream().map(groupMapper::toResponseDto).toList();
         return ResponseEntity.ok(groups);
     }
 }

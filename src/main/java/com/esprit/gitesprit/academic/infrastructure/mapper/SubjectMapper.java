@@ -2,7 +2,8 @@ package com.esprit.gitesprit.academic.infrastructure.mapper;
 
 import com.esprit.gitesprit.academic.domain.model.Subject;
 import com.esprit.gitesprit.academic.infrastructure.dto.request.AddSubjectDto;
-import com.esprit.gitesprit.academic.infrastructure.dto.response.SubjectEntityDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.SubjectDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.SubjectSimpleDto;
 import com.esprit.gitesprit.academic.infrastructure.entity.SubjectEntity;
 import com.esprit.gitesprit.shared.mapstruct.CycleAvoidingMappingContext;
 import com.esprit.gitesprit.shared.mapstruct.DoIgnore;
@@ -31,5 +32,7 @@ public interface SubjectMapper {
 
   // Subject toModelFromUpdateDto( subjectDto);
 
-  SubjectEntityDto toResponseDto(Subject subject);
+  SubjectSimpleDto toSimpleDto(Subject subject);
+
+  SubjectDto toResponseDto(Subject subject);
 }

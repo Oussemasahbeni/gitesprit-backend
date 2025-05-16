@@ -1,8 +1,11 @@
 package com.esprit.gitesprit.academic.infrastructure.mapper;
 
+import com.esprit.gitesprit.academic.domain.model.AcademicYear;
 import com.esprit.gitesprit.academic.domain.model.Classroom;
 import com.esprit.gitesprit.academic.infrastructure.dto.request.AddClassroomDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.AcademicYearSimpleDto;
 import com.esprit.gitesprit.academic.infrastructure.dto.response.ClassroomDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.ClassroomSimpleDto;
 import com.esprit.gitesprit.academic.infrastructure.entity.ClassroomEntity;
 import com.esprit.gitesprit.shared.mapstruct.CycleAvoidingMappingContext;
 import com.esprit.gitesprit.shared.mapstruct.DoIgnore;
@@ -31,6 +34,8 @@ public interface ClassroomMapper {
   Classroom toModelFromDto(AddClassroomDto classroomDto);
 
   // Classroom toModelFromUpdateDto( classroomDto);
+
+  ClassroomSimpleDto toSimpleDto(Classroom classroom);
 
   ClassroomDto toResponseDto(Classroom classroom);
 }

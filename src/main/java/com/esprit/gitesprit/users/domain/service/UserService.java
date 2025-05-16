@@ -124,6 +124,11 @@ public class UserService implements UserUseCases {
   }
 
   @Override
+  public List<User> findAllByRole(RoleType roleType) {
+    return users.findAllByRole(roleType);
+  }
+
+  @Override
   public User createUser(UserRequestDto requestDto) {
     List<String> groups = List.of();
     List<String> requiredActions = List.of("UPDATE_PASSWORD");

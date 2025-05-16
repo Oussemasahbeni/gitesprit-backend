@@ -2,6 +2,7 @@ package com.esprit.gitesprit.academic.infrastructure.adapter.persistence;
 
 import com.esprit.gitesprit.academic.domain.model.Group;
 import com.esprit.gitesprit.academic.domain.port.output.Groups;
+import com.esprit.gitesprit.academic.infrastructure.adapter.specification.GroupSpecification;
 import com.esprit.gitesprit.academic.infrastructure.entity.GroupEntity;
 import com.esprit.gitesprit.academic.infrastructure.mapper.GroupMapper;
 import com.esprit.gitesprit.academic.infrastructure.repository.GroupRepository;
@@ -10,6 +11,7 @@ import com.esprit.gitesprit.shared.annotation.PersistenceAdapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -68,7 +70,8 @@ public class GroupJpaAdapter implements Groups {
 
     @Override
     public Page<Group> findAllPaginated(String search, Pageable pageable) {
-        return null;
+        Specification<GroupEntity> spec = GroupSpecification.hasCriteria(search);
+        return groupRepository.findAll(spec, pageable).map(groupMapper::toModel);
     }
 }
 

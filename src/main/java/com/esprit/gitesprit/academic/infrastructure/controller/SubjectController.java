@@ -3,7 +3,9 @@ package com.esprit.gitesprit.academic.infrastructure.controller;
 import com.esprit.gitesprit.academic.domain.model.Subject;
 import com.esprit.gitesprit.academic.domain.port.input.SubjectUseCases;
 import com.esprit.gitesprit.academic.infrastructure.dto.request.AddSubjectDto;
-import com.esprit.gitesprit.academic.infrastructure.dto.response.SubjectEntityDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.ClassroomDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.SubjectDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.SubjectSimpleDto;
 import com.esprit.gitesprit.academic.infrastructure.mapper.SubjectMapper;
 import com.esprit.gitesprit.shared.pagination.CustomPage;
 import com.esprit.gitesprit.shared.pagination.PageMapper;
@@ -35,16 +37,16 @@ public class SubjectController {
     private final SubjectMapper subjectMapper;
 
     @PostMapping
-    public ResponseEntity<SubjectEntityDto> create(@RequestBody @Valid AddSubjectDto dto) {
+    public ResponseEntity<SubjectSimpleDto> create(@RequestBody @Valid AddSubjectDto dto) {
         Subject subject = subjectMapper.toModelFromDto(dto);
         Subject savedSubject = subjectUseCases.create(subject, dto.teacherId(), dto.classroomId());
-        return ResponseEntity.ok(subjectMapper.toResponseDto(savedSubject));
+        return ResponseEntity.ok(subjectMapper.toSimpleDto(savedSubject));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SubjectEntityDto> findById(@PathVariable UUID id) {
+    public ResponseEntity<SubjectDto> findById(@PathVariable UUID id) {
         Subject subject = subjectUseCases.findById(id);
-        SubjectEntityDto subjectDto = subjectMapper.toResponseDto(subject);
+        SubjectDto subjectDto = subjectMapper.toResponseDto(subject);
         return ResponseEntity.ok(subjectDto);
     }
 
@@ -64,7 +66,7 @@ public class SubjectController {
                     @ApiResponse(responseCode = "400", description = "Invalid pagination parameters", content = @Content),
                     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
             })
-    public ResponseEntity<CustomPage<SubjectEntityDto>> findAllPaginated(
+    public ResponseEntity<CustomPage<SubjectDto>> findAllPaginated(
             @Parameter(description = "Page size", example = "10") @RequestParam(defaultValue = "10") int size,
             @Parameter(description = "Search term") @RequestParam(defaultValue = "") String search,
             @Parameter(description = "Page number (starting from 0)", example = "0") @RequestParam(defaultValue = "0")
@@ -75,7 +77,7 @@ public class SubjectController {
             @RequestParam(defaultValue = "ASC")
             String sortDirection) {
         Pageable pageable = PaginationUtils.createPageable(page, size, sort, sortDirection);
-        Page<SubjectEntityDto> subjects =
+        Page<SubjectDto> subjects =
                 subjectUseCases.findAllPaginated(search, pageable).map(subjectMapper::toResponseDto);
         return ResponseEntity.ok(PageMapper.toCustomPage(subjects));
     }
@@ -90,11 +92,11 @@ public class SubjectController {
                             content =
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = SubjectEntityDto.class))),
+                                    schema = @Schema(implementation = SubjectSimpleDto.class))),
                     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
             })
-    public ResponseEntity<List<SubjectEntityDto>> findAll() {
-        List<SubjectEntityDto> subjects = subjectUseCases.findAll().stream().map(subjectMapper::toResponseDto).toList();
+    public ResponseEntity<List<SubjectDto>> findAll() {
+        List<SubjectDto> subjects = subjectUseCases.findAll().stream().map(subjectMapper::toResponseDto).toList();
         return ResponseEntity.ok(subjects);
     }
 }

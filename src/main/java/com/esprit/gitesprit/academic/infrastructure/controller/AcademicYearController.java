@@ -4,6 +4,7 @@ import com.esprit.gitesprit.academic.domain.model.AcademicYear;
 import com.esprit.gitesprit.academic.domain.port.input.AcademicYearUseCases;
 import com.esprit.gitesprit.academic.infrastructure.dto.request.AddAcademicYearDto;
 import com.esprit.gitesprit.academic.infrastructure.dto.response.AcademicYearDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.AcademicYearSimpleDto;
 import com.esprit.gitesprit.academic.infrastructure.mapper.AcademicYearMapper;
 import com.esprit.gitesprit.shared.pagination.CustomPage;
 import com.esprit.gitesprit.shared.pagination.PageMapper;
@@ -49,11 +50,11 @@ public class AcademicYearController {
                     @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content),
                     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
             })
-    public ResponseEntity<AcademicYear> create(
+    public ResponseEntity<AcademicYearSimpleDto> create(
             @Parameter(description = "Academic year details in JSON format") @RequestBody @Valid AddAcademicYearDto dto) {
         AcademicYear academicYear = academicYearMapper.toModelFromDto(dto);
         AcademicYear createdAcademicYear = academicYearUseCases.create(academicYear);
-        return ResponseEntity.ok(createdAcademicYear);
+        return ResponseEntity.ok(academicYearMapper.toSimpleDto(createdAcademicYear));
     }
 
     @PutMapping("/{id}")
@@ -71,14 +72,14 @@ public class AcademicYearController {
                     @ApiResponse(responseCode = "404", description = "Academic year not found", content = @Content),
                     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
             })
-    public ResponseEntity<AcademicYear> update(
+    public ResponseEntity<AcademicYearSimpleDto> update(
             @Parameter(description = "ID of the academic year to be updated", required = true) @PathVariable UUID id,
             @Parameter(description = "Updated academic year details in JSON format") @RequestBody @Valid AddAcademicYearDto dto) {
         // Map the DTO to the domain model
         AcademicYear academicYear = academicYearMapper.toModelFromDto(dto);
         academicYear.setId(id); // Ensure the ID is set for the update operation
         AcademicYear updatedAcademicYear = academicYearUseCases.update(academicYear);
-        return ResponseEntity.ok(updatedAcademicYear);
+        return ResponseEntity.ok(academicYearMapper.toSimpleDto(updatedAcademicYear));
     }
 
     @DeleteMapping("/{id}")
@@ -109,10 +110,10 @@ public class AcademicYearController {
                     @ApiResponse(responseCode = "404", description = "AcademicYear not found", content = @Content),
                     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
             })
-    public ResponseEntity<AcademicYearDto> findById(
+    public ResponseEntity<AcademicYearSimpleDto> findById(
             @Parameter(description = "ID of the AcademicYear to be retrieved", required = true) @PathVariable UUID id) {
         AcademicYear academicYear = academicYearUseCases.findById(id);
-        return ResponseEntity.ok(academicYearMapper.toResponseDto(academicYear));
+        return ResponseEntity.ok(academicYearMapper.toSimpleDto(academicYear));
     }
 
     @GetMapping
@@ -131,7 +132,7 @@ public class AcademicYearController {
                     @ApiResponse(responseCode = "400", description = "Invalid pagination parameters", content = @Content),
                     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
             })
-    public ResponseEntity<CustomPage<AcademicYearDto>> findAllPaginated(
+    public ResponseEntity<CustomPage<AcademicYearSimpleDto>> findAllPaginated(
             @Parameter(description = "Page size", example = "10") @RequestParam(defaultValue = "10") int size,
             @Parameter(description = "Page number (starting from 0)", example = "0") @RequestParam(defaultValue = "0")
             int page,
@@ -141,8 +142,8 @@ public class AcademicYearController {
             @RequestParam(defaultValue = "ASC")
             String sortDirection) {
         Pageable pageable = PaginationUtils.createPageable(page, size, sort, sortDirection);
-        Page<AcademicYearDto> academicYears =
-                academicYearUseCases.findAllPaginated(pageable).map(academicYearMapper::toResponseDto);
+        Page<AcademicYearSimpleDto> academicYears =
+                academicYearUseCases.findAllPaginated(pageable).map(academicYearMapper::toSimpleDto);
         return ResponseEntity.ok(PageMapper.toCustomPage(academicYears));
     }
 

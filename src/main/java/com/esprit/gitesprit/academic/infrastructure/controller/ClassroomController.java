@@ -4,7 +4,7 @@ import com.esprit.gitesprit.academic.domain.model.Classroom;
 import com.esprit.gitesprit.academic.domain.port.input.ClassroomUseCases;
 import com.esprit.gitesprit.academic.infrastructure.dto.request.AddClassroomDto;
 import com.esprit.gitesprit.academic.infrastructure.dto.response.ClassroomDto;
-import com.esprit.gitesprit.academic.infrastructure.dto.response.ClassroomDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.ClassroomSimpleDto;
 import com.esprit.gitesprit.academic.infrastructure.mapper.ClassroomMapper;
 import com.esprit.gitesprit.shared.pagination.CustomPage;
 import com.esprit.gitesprit.shared.pagination.PageMapper;
@@ -36,17 +36,17 @@ public class ClassroomController {
     private final ClassroomMapper classroomMapper;
 
     @PostMapping
-    public ResponseEntity<ClassroomDto> create(@RequestBody @Valid AddClassroomDto dto){
+    public ResponseEntity<ClassroomSimpleDto> create(@RequestBody @Valid AddClassroomDto dto){
         Classroom classroom = classroomMapper.toModelFromDto(dto);
         Classroom savedClassroom = classroomUseCases.create(classroom, dto.academicYearId());
-        return ResponseEntity.ok(classroomMapper.toResponseDto(savedClassroom));
+        return ResponseEntity.ok(classroomMapper.toSimpleDto(savedClassroom));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ClassroomDto> findById(@PathVariable UUID id){
         Classroom classroom = classroomUseCases.findById(id);
-        ClassroomDto classroomDto = classroomMapper.toResponseDto(classroom);
-        return ResponseEntity.ok(classroomDto);
+        ClassroomDto classroomSimpleDto = classroomMapper.toResponseDto(classroom);
+        return ResponseEntity.ok(classroomSimpleDto);
     }
 
     @GetMapping
@@ -91,7 +91,7 @@ public class ClassroomController {
                             content =
                             @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ClassroomDto.class))),
+                                    schema = @Schema(implementation = ClassroomSimpleDto.class))),
                     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
             })
     public ResponseEntity<List<ClassroomDto>> findAll() {

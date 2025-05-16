@@ -29,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.UUID;
 
 import static com.esprit.gitesprit.shared.AuthUtils.getCurrentAuthenticatedUserId;
@@ -81,6 +82,18 @@ public class UserController {
         Page<UserDto> usersPage =
                 usersUseCases.findAllPaginated(search, role, pageable).map(userMapper::toUserDto);
         return ResponseEntity.ok(PageMapper.toCustomPage(usersPage));
+    }
+
+    @Operation(
+            summary = "Find all users by role",
+            description =
+                    "Retrieve all users by Role.")
+    @GetMapping("/all")
+    public ResponseEntity<List<UserDto>> findAllByRole(
+            @RequestParam RoleType role) {
+
+        List<UserDto> users = usersUseCases.findAllByRole(role).stream().map(userMapper::toUserDto).toList();
+        return ResponseEntity.ok(users);
     }
 
 

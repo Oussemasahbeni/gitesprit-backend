@@ -114,6 +114,11 @@ public class UserJpaAdapter implements Users {
     }
 
     @Override
+    public List<User> findAllByRole(RoleType roleType) {
+        return userRepository.findAllByRoleType(roleType).stream().map(userMapper::toUser).toList();
+    }
+
+    @Override
     public Page<User> findAll(String search, Pageable pageable, RoleType roleType) {
         return userRepository
                 .findAll(UserSpecifications.hasCriteria(search, roleType), pageable)

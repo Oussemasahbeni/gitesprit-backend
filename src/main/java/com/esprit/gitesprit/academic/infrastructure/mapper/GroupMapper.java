@@ -2,7 +2,8 @@ package com.esprit.gitesprit.academic.infrastructure.mapper;
 
 import com.esprit.gitesprit.academic.domain.model.Group;
 import com.esprit.gitesprit.academic.infrastructure.dto.request.AddGroupDto;
-import com.esprit.gitesprit.academic.infrastructure.dto.response.GroupEntityDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.GroupDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.response.GroupSimpleDto;
 import com.esprit.gitesprit.academic.infrastructure.entity.GroupEntity;
 import com.esprit.gitesprit.shared.mapstruct.CycleAvoidingMappingContext;
 import com.esprit.gitesprit.shared.mapstruct.DoIgnore;
@@ -31,5 +32,7 @@ public interface GroupMapper {
 
   // Group toModelFromUpdateDto( groupDto);
 
-  GroupEntityDto toResponseDto(Group group);
+  GroupSimpleDto toSimpleDto(Group group);
+
+  GroupDto toResponseDto(Group group);
 }
