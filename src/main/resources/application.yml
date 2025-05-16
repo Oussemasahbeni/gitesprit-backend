@@ -117,19 +117,27 @@ springdoc:
     path: /docs
     operationsSorter: method
     display-request-duration: true
-#    oauth:
-#      client-id: ${KEYCLOAK_CLIENT_ID}
-#      client-secret: ${KEYCLOAK_CLIENT_SECRET}
-#      scopes: openid profile
-#    oauth2-redirect-url: ${application.backend-url}/swagger-ui/oauth2-redirect.html
+    oauth:
+      client-id: ${KEYCLOAK_CLIENT_ID}
+      client-secret: ${KEYCLOAK_CLIENT_SECRET}
+      scopes: openid profile
+    oauth2-redirect-url: ${application.backend-url}/swagger-ui/oauth2-redirect.html
   default-produces-media-type: application/json
+
+git:
+  server:
+    repos:
+     path: ./repositories
+     auto-create-on-push: true
 
 server:
   port: 8082
 
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework.security: DEBUG # Keep DEBUG or TRACE
+    org.eclipse.jgit: DEBUG # Keep DEBUG or TRACE
+    com.esprit.gitesprit: DEBUG # Your app's root package
 
 
 management:

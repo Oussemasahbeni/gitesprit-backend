@@ -38,6 +38,7 @@
         <java-faker.version>2.4.3</java-faker.version>
         <spring-ai.version>1.0.0-M8</spring-ai.version>
         <loki-logback-appender.version>1.6.0</loki-logback-appender.version>
+        <org.eclipse.jgit.version>7.2.0.202503040940-r</org.eclipse.jgit.version>
     </properties>
     <dependencies>
 
@@ -161,6 +162,18 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>${org.eclipse.jgit.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit.http.server</artifactId>
+            <version>${org.eclipse.jgit.version}</version>
         </dependency>
 
         <dependency>
