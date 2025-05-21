@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Log4j2
 public class EmailTypeConfig {
 
-    @Value("${application.frontend.url}")
+    @Value("${application.frontend-url}")
     private String frontendUrl;
 
     @PostConstruct

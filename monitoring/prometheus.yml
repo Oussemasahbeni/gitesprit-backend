@@ -1,0 +1,18 @@
+scrape_configs:
+  - job_name: 'spring-boot-application'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: [ 'host.docker.internal:8082' ]  # This is the host machine's IP address , don't use it in production
+        labels:
+          application: 'git-esprit'
+  - job_name: 'keycloak'
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    static_configs:
+      - targets: [ 'keycloak-gitesprit:9000' ]
+        labels:
+          application: 'gitesprit keycloak'
+  - job_name: 'loki'
+    static_configs:
+      - targets: [ 'loki:3100' ]
