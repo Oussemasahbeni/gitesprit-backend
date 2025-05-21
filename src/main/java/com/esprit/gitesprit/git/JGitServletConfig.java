@@ -1,5 +1,7 @@
-package com.esprit.gitesprit.git; // Assuming this is your correct package
+package com.esprit.gitesprit.git;
 
+import com.esprit.gitesprit.git.infrastructure.entity.GitRepositoryEntity;
+import com.esprit.gitesprit.git.infrastructure.repository.GitRepositoryRepository;
 import jakarta.servlet.Servlet;
 import jakarta.servlet.http.HttpServletRequest;
 import org.eclipse.jgit.api.Git;
@@ -8,7 +10,7 @@ import org.eclipse.jgit.http.server.GitServlet;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.ReceivePack;
-import org.eclipse.jgit.transport.UploadPack; // Import if you set UploadPackFactory
+import org.eclipse.jgit.transport.UploadPack;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
@@ -18,12 +20,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.Transactional; // Import for transaction on auto-create
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 @Configuration
 public class JGitServletConfig {
@@ -33,8 +37,15 @@ public class JGitServletConfig {
     @Value("${git.server.repos.path}")
     private String repositoriesBasePath;
 
-    @Value("${git.server.repos.auto-create-on-push:true}") // Defaulting to true for this example
+    @Value("${git.server.repos.auto-create-on-push:true}")
     private boolean autoCreateRepositoriesOnPush;
+
+    // Inject the GitRepositoryRepository here
+    private final GitRepositoryRepository gitRepositoryRepository;
+
+    public JGitServletConfig(GitRepositoryRepository gitRepositoryRepository) {
+        this.gitRepositoryRepository = gitRepositoryRepository;
+    }
 
     @Bean
     public ServletRegistrationBean<Servlet> gitServletRegistrationBean() throws IOException {
@@ -48,21 +59,19 @@ public class JGitServletConfig {
             log.info("Using Git repositories base directory: {}", basePath.toAbsolutePath());
         }
 
+        // Pass the GitRepositoryRepository to the custom resolver
         gitServlet.setRepositoryResolver(new CreateOnPushRepositoryResolver(
                 repositoriesBasePath,
-                autoCreateRepositoriesOnPush
+                autoCreateRepositoriesOnPush,
+                gitRepositoryRepository // Pass the repository bean
         ));
-
-        // --- Configure factories for UploadPack (fetch/clone) and ReceivePack (push) ---
-        // This allows operations on any resolved repository.
-        // Add authorization checks here if needed.
 
         gitServlet.setUploadPackFactory((req, db) -> {
             log.debug("Creating UploadPack for repository: {} for request URI: {}",
                     (db != null && db.getDirectory() != null ? db.getDirectory().getName() : "N/A"),
                     req.getRequestURI()
             );
-            if (db == null) { // Should ideally not happen if resolver did its job
+            if (db == null) {
                 throw new ServiceNotEnabledException("Repository not available for UploadPack operation.");
             }
             return new UploadPack(db);
@@ -73,18 +82,15 @@ public class JGitServletConfig {
                     (db != null && db.getDirectory() != null ? db.getDirectory().getName() : "N/A"),
                     req.getRequestURI()
             );
-            if (db == null) { // Should ideally not happen
+            if (db == null) {
                 throw new ServiceNotEnabledException("Repository not available for ReceivePack operation.");
             }
-            // Potentially check db.getConfig().getBoolean("http", "receivepack", true/false)
-            // But for now, this factory enables it by default.
             ReceivePack rp = new ReceivePack(db);
-            // rp.setAllowPushOptions(true); // Optional: if you want to support git push --push-option
-            // rp.setAllowDeletes(true);   // Optional: if you want to allow deleting remote branches
-            // rp.setAllowNonFastForwards(true); // Optional: if you want to allow force pushes (use with caution)
+            // rp.setAllowPushOptions(true);
+            // rp.setAllowDeletes(true);
+            // rp.setAllowNonFastForwards(true);
             return rp;
         });
-        // --- End of factory configuration ---
 
         ServletRegistrationBean<Servlet> registration =
                 new ServletRegistrationBean<>(gitServlet, "/git/*");
@@ -92,35 +98,40 @@ public class JGitServletConfig {
         return registration;
     }
 
+    // Make this class public static to allow Spring to potentially autowire it,
+    // though we are manually instantiating it and passing dependencies.
+    // @Component // You could make it a component if it were not nested and needed wider use.
     static class CreateOnPushRepositoryResolver implements RepositoryResolver<HttpServletRequest> {
         private final File baseDir;
-        private final boolean autoCreateOnPushEnabled; // Renamed for clarity
+        private final boolean autoCreateOnPushEnabled;
+        private final GitRepositoryRepository gitRepositoryRepository; // New: Inject repository
         private static final Logger resolverLog = LoggerFactory.getLogger(CreateOnPushRepositoryResolver.class);
 
-        public CreateOnPushRepositoryResolver(String basePath, boolean autoCreateOnPush) {
+        public CreateOnPushRepositoryResolver(String basePath, boolean autoCreateOnPush, GitRepositoryRepository gitRepositoryRepository) {
             this.baseDir = new File(basePath);
             this.autoCreateOnPushEnabled = autoCreateOnPush;
+            this.gitRepositoryRepository = gitRepositoryRepository; // Assign injected repository
             if (!this.baseDir.exists()) {
                 try {
                     resolverLog.info("Base repository directory {} does not exist. Attempting to create.", this.baseDir.getAbsolutePath());
                     Files.createDirectories(this.baseDir.toPath());
                 } catch (IOException e) {
                     resolverLog.error("Failed to create base repository directory: {}", this.baseDir.getAbsolutePath(), e);
-                    // Consider throwing a runtime exception here to prevent app startup if base dir is critical
+                    // Critical failure, might want to throw RuntimeException
                 }
             } else if (!this.baseDir.isDirectory()) {
                 resolverLog.error("Base repository path {} exists but is not a directory.", this.baseDir.getAbsolutePath());
-                // Consider throwing a runtime exception
+                // Critical failure, might want to throw RuntimeException
             }
         }
 
         @Override
+        @Transactional // Ensure DB operations within this method are transactional
         public Repository open(HttpServletRequest req, String name)
                 throws ServiceNotAuthorizedException, ServiceNotEnabledException {
             resolverLog.debug("Attempting to resolve repository: '{}', Request: {} {}?{}",
                     name, req.getMethod(), req.getRequestURI(), req.getQueryString());
 
-            // Basic path sanitization
             if (name == null || name.trim().isEmpty() || name.contains("..") || name.contains("/") || name.contains("\\")) {
                 resolverLog.warn("Invalid repository name requested: '{}'", name);
                 throw new ServiceNotEnabledException("Invalid repository name: " + name);
@@ -131,56 +142,87 @@ public class JGitServletConfig {
                 repoName += ".git";
             }
 
-            File repoDir = new File(baseDir, repoName);
-            resolverLog.debug("Resolved repository path: {}", repoDir.getAbsolutePath());
+            File repoDir = null; // Will be set either from DB or new creation
 
-            if (!repoDir.exists()) {
+            // 1. Check if the repository exists in the database first
+            Optional<GitRepositoryEntity> dbRepo = gitRepositoryRepository.findByRepositoryName(repoName);
+
+            if (dbRepo.isPresent()) {
+                resolverLog.debug("Repository '{}' found in database. Path: {}", repoName, dbRepo.get().getRepositoryPath());
+                repoDir = new File(dbRepo.get().getRepositoryPath());
+
+                if (!repoDir.exists()) {
+                    resolverLog.warn("Inconsistency: Repository '{}' found in DB but not on filesystem at {}. Removing from DB.",
+                            repoName, repoDir.getAbsolutePath());
+                    // Remove from DB if filesystem copy is gone. This assumes filesystem is the ultimate source of truth for existence.
+                    gitRepositoryRepository.delete(dbRepo.get());
+                    throw new ServiceNotEnabledException("Repository not found on filesystem, removed from DB: " + repoName);
+                }
+            } else {
+                // Repository not found in the database
                 String service = req.getParameter("service");
                 boolean isPushRelatedOperation = "git-receive-pack".equals(service);
 
-                // The actual push operation is a POST to /git/<repo>/git-receive-pack
                 if (!isPushRelatedOperation && "POST".equalsIgnoreCase(req.getMethod()) &&
                         req.getRequestURI().endsWith("/git-receive-pack")) {
                     isPushRelatedOperation = true;
                 }
 
-                resolverLog.debug("Repository does not exist. Is push-related? {}. Auto-create enabled? {}",
-                        isPushRelatedOperation, autoCreateOnPushEnabled);
+                resolverLog.debug("Repository '{}' not found in DB. Is push-related? {}. Auto-create enabled? {}",
+                        repoName, isPushRelatedOperation, autoCreateOnPushEnabled);
 
                 if (autoCreateOnPushEnabled && isPushRelatedOperation) {
-                    resolverLog.info("Repository '{}' not found. Auto-creating due to push-related operation (service='{}', method='{}').",
-                            repoName, service, req.getMethod());
+                    repoDir = new File(baseDir, repoName); // Define path for new repository
+                    resolverLog.info("Repository '{}' not found. Auto-creating due to push-related operation (service='{}', method='{}') at {}",
+                            repoName, service, req.getMethod(), repoDir.getAbsolutePath());
                     try {
-                        // The parent directory (baseDir) must exist.
                         if (!baseDir.exists() && !baseDir.mkdirs()) {
                             resolverLog.error("Failed to create base directory for repositories: {}", baseDir.getAbsolutePath());
                             throw new IOException("Failed to create base repository directory: " + baseDir.getAbsolutePath());
                         }
-                        // Create a new bare repository using try-with-resources for the Git object
-                        try (Git git = Git.init().setDirectory(repoDir).setBare(true).call()) {
-                            resolverLog.info("Successfully auto-created bare repository: {}", repoDir.getAbsolutePath());
+
+                        // Ensure filesystem doesn't already have it (race condition safety or prior failed creation)
+                        if (repoDir.exists()) {
+                            resolverLog.warn("Repository directory {} already exists on filesystem but not in DB during auto-create attempt. Adding to DB.", repoDir.getAbsolutePath());
+                            // If it exists on filesystem but not in DB, and auto-create was triggered, add it to DB.
+                            // This handles cases where a previous auto-create created the directory but failed to save to DB.
+                            if (!isValidGitRepository(repoDir)) {
+                                throw new ServiceNotEnabledException("Directory exists but is not a valid Git repository: " + repoDir.getAbsolutePath());
+                            }
+                        } else {
+                            // Create a new bare repository on filesystem
+                            try (Git git = Git.init().setDirectory(repoDir).setBare(true).call()) {
+                                resolverLog.info("Successfully auto-created bare repository on filesystem: {}", repoDir.getAbsolutePath());
+                            }
                         }
+
+                        // Save to database only after successful filesystem creation/discovery
+                        GitRepositoryEntity newRepo = new GitRepositoryEntity();
+                        newRepo.setRepositoryName(repoName);
+                        newRepo.setRepositoryPath(repoDir.getAbsolutePath());
+                        gitRepositoryRepository.save(newRepo);
+                        resolverLog.info("Saved auto-created repository to database: {}", repoName);
+
                     } catch (GitAPIException | IOException e) {
                         resolverLog.error("Failed to auto-create repository '{}': {}", repoName, e.getMessage(), e);
                         throw new ServiceNotEnabledException("Failed to create repository " + repoName, e);
                     }
-                } else if (isPushRelatedOperation) {
-                    resolverLog.warn("Push-related operation for non-existent repository '{}' denied (auto-create is disabled).", repoName);
-                    throw new ServiceNotEnabledException("Repository not found and auto-creation is disabled: " + repoName);
                 } else {
-                    resolverLog.debug("Repository '{}' not found for non-push-related operation (service='{}').", repoName, service);
-                    throw new ServiceNotEnabledException("Repository not found: " + repoName);
+                    resolverLog.debug("Repository '{}' not found in DB for non-push-related operation (service='{}') or auto-create disabled.", repoName, service);
+                    throw new ServiceNotEnabledException("Repository not found and auto-creation not permitted: " + repoName);
                 }
-            } else if (!repoDir.isDirectory()) {
-                resolverLog.warn("Path {} exists but is not a directory.", repoDir.getAbsolutePath());
-                throw new ServiceNotEnabledException("Repository path exists but is not a directory: " + repoName);
             }
 
-            // At this point, repoDir should exist (either pre-existing or auto-created)
-            // and be a directory. Now, verify it's a valid Git repository structure.
+            // At this point, repoDir should be set and point to an existing directory
+            // (either retrieved from DB, or newly auto-created).
+            if (repoDir == null || !repoDir.isDirectory()) {
+                resolverLog.error("Resolved path {} is not a valid directory for repository {}.",
+                        repoDir != null ? repoDir.getAbsolutePath() : "null", repoName);
+                throw new ServiceNotEnabledException("Invalid repository path or directory: " + repoName);
+            }
+
+            // Verify it's a valid Git repository structure, even if it came from DB
             if (!isValidGitRepository(repoDir)) {
-                // This can happen if auto-creation failed silently or if an empty directory exists
-                // with the repo name but isn't a git repo.
                 resolverLog.error("Path {} exists but is not a valid (bare) Git repository.", repoDir.getAbsolutePath());
                 throw new ServiceNotEnabledException("Not a valid Git repository: " + repoName);
             }
@@ -188,10 +230,10 @@ public class JGitServletConfig {
             try {
                 resolverLog.debug("Attempting to build repository object for valid Git directory: {}", repoDir.getAbsolutePath());
                 return new FileRepositoryBuilder()
-                        .setGitDir(repoDir) // For bare repositories, repoDir IS the .git directory.
+                        .setGitDir(repoDir)
                         .readEnvironment()
-                        .findGitDir() // Less critical if .setGitDir is used correctly for bare repos.
-                        .setMustExist(true) // It must exist and be a valid git dir.
+                        .findGitDir()
+                        .setMustExist(true)
                         .build();
             } catch (IOException e) {
                 resolverLog.error("Cannot open repository '{}' at {}: {}", repoName, repoDir.getAbsolutePath(), e.getMessage(), e);
@@ -199,17 +241,13 @@ public class JGitServletConfig {
             }
         }
 
-        /**
-         * Checks if the given directory appears to be a valid bare Git repository.
-         */
         private boolean isValidGitRepository(File gitDir) {
             if (!gitDir.exists() || !gitDir.isDirectory()) {
                 resolverLog.trace("isValidGitRepository: false, path does not exist or not a directory: {}", gitDir.getAbsolutePath());
                 return false;
             }
-            // Essential files/directories for a bare Git repository
             boolean hasHead = new File(gitDir, "HEAD").exists();
-            boolean hasConfig = new File(gitDir, "config").isFile(); // config is a file
+            boolean hasConfig = new File(gitDir, "config").isFile();
             boolean hasObjectsDir = new File(gitDir, "objects").isDirectory();
             boolean hasRefsDir = new File(gitDir, "refs").isDirectory();
 
