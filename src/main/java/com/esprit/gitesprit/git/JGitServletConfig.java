@@ -4,6 +4,7 @@ import com.esprit.gitesprit.git.infrastructure.entity.GitRepositoryEntity;
 import com.esprit.gitesprit.git.infrastructure.repository.GitRepositoryRepository;
 import jakarta.servlet.Servlet;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.http.server.GitServlet;
@@ -30,6 +31,7 @@ import java.nio.file.Paths;
 import java.util.Optional;
 
 @Configuration
+@RequiredArgsConstructor
 public class JGitServletConfig {
 
     private static final Logger log = LoggerFactory.getLogger(JGitServletConfig.class);
@@ -42,10 +44,6 @@ public class JGitServletConfig {
 
     // Inject the GitRepositoryRepository here
     private final GitRepositoryRepository gitRepositoryRepository;
-
-    public JGitServletConfig(GitRepositoryRepository gitRepositoryRepository) {
-        this.gitRepositoryRepository = gitRepositoryRepository;
-    }
 
     @Bean
     public ServletRegistrationBean<Servlet> gitServletRegistrationBean() throws IOException {

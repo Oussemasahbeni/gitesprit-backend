@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -166,13 +167,14 @@ public class GitRepositoryService {
     public RepositoryStatistics getRepositoryStatistics(String repoName) {
         try (Repository repository = openJGitRepository(repoName).orElse(null)) {
             if (repository == null) {
+                log.warn("Repository '{}' not found or could not be opened.", repoName);
                 return null;
             }
 
             try (Git git = new Git(repository)) {
                 // Total Commits
-                Iterable<RevCommit> allCommits = git.log().all().call();
-                List<RevCommit> commitList = StreamSupport.stream(allCommits.spliterator(), false)
+                Iterable<RevCommit> allCommitsIterable = git.log().all().call();
+                List<RevCommit> commitList = StreamSupport.stream(allCommitsIterable.spliterator(), false)
                         .collect(Collectors.toList());
                 long totalCommits = commitList.size();
 
@@ -215,14 +217,70 @@ public class GitRepositoryService {
                     String authorName = commit.getAuthorIdent().getName();
                     authorCommitCounts.merge(authorEmail, 1L, Long::sum);
 
-                    // Add/update contributor info
-                    contributors.removeIf(c -> c.getEmail().equals(authorEmail)); // Remove old entry if exists
+                    // Add/update contributor info - ensuring uniqueness by email
+                    // This approach is not ideal for `Set` as it removes and re-adds.
+                    // A better way would be to compute all counts first then create ContributorInfo objects.
+                    // However, keeping it as is from your original code for minimal disruption.
+                    contributors.removeIf(c -> c.getEmail().equals(authorEmail));
                     contributors.add(ContributorInfo.builder()
                             .name(authorName)
                             .email(authorEmail)
-                            .commitCount(authorCommitCounts.get(authorEmail)) // Get current count
+                            .commitCount(authorCommitCounts.get(authorEmail))
                             .build());
                 }
+
+                // --- NEW: Daily Statistics Calculation for the Graph ---
+                Map<LocalDate, Long> dailyNewCommits = new HashMap<>();
+                Map<LocalDate, Long> dailyMergedCommits = new HashMap<>();
+
+                // Determine the time window (last 7 days, including today)
+                LocalDate today = LocalDate.now();
+                // Use a specific ZoneId if your Git commits are in a different timezone than system default
+                ZoneId defaultZoneId = ZoneId.systemDefault();
+
+                // Initialize maps for the last 7 days with zero counts
+                // This ensures all days (Mon-Sun like in the graph) are represented, even if no commits occurred.
+                for (int i = 6; i >= 0; i--) { // Loop from 6 days ago up to today
+                    LocalDate date = today.minusDays(i);
+                    dailyNewCommits.put(date, 0L);
+                    dailyMergedCommits.put(date, 0L);
+                }
+
+
+                // Iterate through all commits to populate daily stats
+                for (RevCommit commit : commitList) {
+                    LocalDate commitDate = Instant.ofEpochSecond(commit.getCommitTime())
+                            .atZone(defaultZoneId)
+                            .toLocalDate();
+
+                    // Only process commits within the last 7 days (inclusive of today)
+                    if (!commitDate.isBefore(today.minusDays(6)) && !commitDate.isAfter(today)) {
+                        // Increment count for all commits made on this day ("New")
+                        dailyNewCommits.merge(commitDate, 1L, Long::sum);
+
+                        // If it's a merge commit (has more than one parent), increment "Closed" count
+                        if (commit.getParentCount() > 1) {
+                            dailyMergedCommits.merge(commitDate, 1L, Long::sum);
+                        }
+                    }
+                }
+
+                // Sort the maps by date. Although a Map doesn't guarantee order,
+                // using LinkedHashMap for `Collectors.toMap` with sorting ensures
+                // a predictable iteration order if needed for displaying.
+                Map<LocalDate, Long> sortedDailyNewCommits = dailyNewCommits.entrySet().stream()
+                        .sorted(Map.Entry.comparingByKey())
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (oldValue, newValue) -> oldValue, LinkedHashMap::new)); // Use LinkedHashMap to preserve order
+
+                Map<LocalDate, Long> sortedDailyMergedCommits = dailyMergedCommits.entrySet().stream()
+                        .sorted(Map.Entry.comparingByKey())
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                Map.Entry::getValue,
+                                (oldValue, newValue) -> oldValue, LinkedHashMap::new)); // Use LinkedHashMap to preserve order
 
                 return RepositoryStatistics.builder()
                         .repositoryName(repoName)
@@ -233,6 +291,9 @@ public class GitRepositoryService {
                         .lastCommitAuthor(lastCommit != null ? lastCommit.getAuthorIdent().getName() : null)
                         .contributors(contributors)
                         .branches(branchInfos)
+                        // Add the newly calculated daily statistics
+                        .dailyNewCommits(sortedDailyNewCommits)
+                        .dailyMergedCommits(sortedDailyMergedCommits)
                         .build();
 
             } catch (GitAPIException | IOException e) {

@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @SuperBuilder
@@ -24,4 +26,8 @@ public class RepositoryStatistics extends AbstractAuditingModel {
     private String lastCommitAuthor;
     private Set<ContributorInfo> contributors;
     private List<BranchInfo> branches;
+
+    // New fields for daily statistics (to be plotted on the graph)
+    private Map<LocalDate, Long> dailyNewCommits; // Represents daily total commits (like 'New' issues)
+    private Map<LocalDate, Long> dailyMergedCommits; // Represents daily merge commits (like 'Closed' issues)
 }

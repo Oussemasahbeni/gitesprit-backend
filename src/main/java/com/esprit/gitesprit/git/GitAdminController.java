@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api/repos")
+@RequestMapping("/api/v1/repos")
 @RequiredArgsConstructor
 public class GitAdminController {
 
