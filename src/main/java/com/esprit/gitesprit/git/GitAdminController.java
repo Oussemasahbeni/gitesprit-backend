@@ -1,19 +1,21 @@
 package com.esprit.gitesprit.git;
 
-import com.esprit.gitesprit.git.domain.model.BranchInfo;
-import com.esprit.gitesprit.git.domain.model.CommitInfo;
-import com.esprit.gitesprit.git.domain.model.ContributorInfo;
-import com.esprit.gitesprit.git.domain.model.RepositoryStatistics;
+import com.esprit.gitesprit.git.domain.enums.ContentType;
+import com.esprit.gitesprit.git.domain.model.*;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired; // Can remove this if only using @RequiredArgsConstructor
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.HandlerMapping;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -95,6 +97,45 @@ public class GitAdminController {
             return ResponseEntity.ok(branches);
         } else {
             return ResponseEntity.ok(Collections.emptyList()); // Or 404 if repo not found
+        }
+    }
+
+    @GetMapping("/{repoName}/contents")
+    public ResponseEntity<List<RepositoryContent>> getRepositoryContents(
+            @PathVariable String repoName,
+            @RequestParam String branchName) {
+
+        List<RepositoryContent> contents = gitRepositoryService.getBranchContents(repoName, branchName);
+
+        if (contents.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(contents);
+    }
+
+    // You might also want an endpoint to download a single file
+    @GetMapping("/{repoName}/file/{branchName}/**") // Using /** to capture the full path
+    public ResponseEntity<byte[]> downloadFile(
+            @PathVariable String repoName,
+            @PathVariable String branchName,
+            HttpServletRequest request) { // Inject HttpServletRequest to get the full path
+
+        String fullPath = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+        String filePath = fullPath.substring(fullPath.indexOf(branchName) + branchName.length() + 1); // Extract path after branchName
+
+        List<RepositoryContent> contents = gitRepositoryService.getBranchContents(repoName, branchName);
+        Optional<RepositoryContent> fileContent = contents.stream()
+                .filter(content -> content.getType() == ContentType.FILE && content.getPath().equals(filePath))
+                .findFirst();
+
+        if (fileContent.isPresent()) {
+            RepositoryContent file = fileContent.get();
+            // You might need to set content type based on file extension
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                    .body(file.getContent());
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 }

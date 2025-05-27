@@ -1,20 +1,26 @@
 package com.esprit.gitesprit.git;
 
+import com.esprit.gitesprit.git.domain.enums.ContentType;
 import com.esprit.gitesprit.git.domain.model.BranchInfo;
 import com.esprit.gitesprit.git.domain.model.CommitInfo;
 import com.esprit.gitesprit.git.domain.model.ContributorInfo;
 import com.esprit.gitesprit.git.domain.model.RepositoryStatistics;
 import com.esprit.gitesprit.git.infrastructure.entity.GitRepositoryEntity;
 import com.esprit.gitesprit.git.infrastructure.repository.GitRepositoryRepository;
+import com.esprit.gitesprit.git.domain.model.RepositoryContent;
+
 import lombok.RequiredArgsConstructor;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId; // New import
+import org.eclipse.jgit.lib.ObjectLoader; // New import
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.treewalk.TreeWalk; // New import
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,8 +72,9 @@ public class GitRepositoryService {
                     return Optional.empty();
                 }
             } else {
-                log.warn("Repository '{}' found in DB but not on filesystem at {}.", fullRepoName, repoDir.getAbsolutePath());
+                log.warn("Repository '{}' found in DB but not on filesystem at {}. Removing from DB.", fullRepoName, repoDir.getAbsolutePath());
                 // Consider cleaning up DB entry here if filesystem is canonical source
+                gitRepositoryRepository.delete(repoEntity.get()); // Added cleanup here for consistency
                 return Optional.empty();
             }
         } else {
@@ -422,5 +429,89 @@ public class GitRepositoryService {
             }
         }
         return branchInfos;
+    }
+
+    /**
+     * Retrieves all files and directories from a specific branch in a Git repository.
+     *
+     * @param repoName   The name of the repository.
+     * @param branchName The name of the branch (e.g., "main", "develop").
+     * @return A list of RepositoryContent objects representing the files and directories.
+     *         Returns an empty list if the repository or branch is not found, or on error.
+     */
+    public List<RepositoryContent> getBranchContents(String repoName, String branchName) {
+        List<RepositoryContent> contents = new ArrayList<>();
+        try (Repository repository = openJGitRepository(repoName).orElse(null)) {
+            if (repository == null) {
+                log.warn("Repository '{}' not found or could not be opened for content retrieval.", repoName);
+                return Collections.emptyList();
+            }
+
+            Ref branchRef = repository.findRef(Constants.R_HEADS + branchName);
+            if (branchRef == null) {
+                log.warn("Branch '{}' not found in repository '{}'.", branchName, repoName);
+                // Also try "refs/remotes/origin/" for remote branches if direct head fails
+                branchRef = repository.findRef(Constants.R_REMOTES + "origin/" + branchName);
+                if (branchRef == null) {
+                    log.warn("Branch '{}' not found as local or remote/origin branch in repository '{}'.", branchName, repoName);
+                    return Collections.emptyList();
+                }
+            }
+
+            try (RevWalk revWalk = new RevWalk(repository)) {
+                RevCommit commit = revWalk.parseCommit(branchRef.getObjectId());
+                ObjectId treeId = commit.getTree().getId();
+
+                // Use TreeWalk to traverse the tree recursively
+                try (TreeWalk treeWalk = new TreeWalk(repository)) {
+                    treeWalk.addTree(treeId);
+                    // IMPORTANT CHANGE: Set recursive to FALSE initially
+                    // We will manually enter subtrees
+                    treeWalk.setRecursive(false);
+
+                    while (treeWalk.next()) {
+                        String path = treeWalk.getPathString();
+                        String name = treeWalk.getNameString();
+                        ContentType type;
+                        byte[] fileContent = null;
+
+                        // Check if it's a file (BLOB) or a directory (TREE)
+                        if (treeWalk.isSubtree()) {
+                            type = ContentType.DIRECTORY;
+                            contents.add(RepositoryContent.builder()
+                                    .name(name)
+                                    .path(path)
+                                    .type(type)
+                                    .content(null) // Directories don't have content
+                                    .build());
+
+                            // IMPORTANT: Enter the subtree to traverse its contents
+                            // The next call to treeWalk.next() will then iterate
+                            // through the entries *inside* this directory.
+                            treeWalk.enterSubtree();
+
+                        } else {
+                            type = ContentType.FILE;
+                            // Load file content
+                            ObjectId objectId = treeWalk.getObjectId(0);
+                            ObjectLoader loader = repository.open(objectId);
+                            fileContent = loader.getBytes();
+
+                            contents.add(RepositoryContent.builder()
+                                    .name(name)
+                                    .path(path)
+                                    .type(type)
+                                    .content(fileContent)
+                                    .build());
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                log.error("Error traversing tree for repository '{}' branch '{}': {}", repoName, branchName, e.getMessage(), e);
+            }
+        } catch (IOException e) {
+            log.error("Error opening repository for content retrieval '{}': {}", repoName, e.getMessage(), e);
+        }
+        return contents;
     }
 }
