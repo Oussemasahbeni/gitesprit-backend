@@ -1,4 +1,4 @@
-package com.esprit.gitesprit.git;
+package com.esprit.gitesprit.git.domain.service;
 
 import com.esprit.gitesprit.git.domain.enums.ContentType;
 import com.esprit.gitesprit.git.domain.model.BranchInfo;
@@ -32,7 +32,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;

@@ -1,4 +1,4 @@
-package com.esprit.gitesprit.git;
+package com.esprit.gitesprit.config;
 
 import com.esprit.gitesprit.git.infrastructure.entity.GitRepositoryEntity;
 import com.esprit.gitesprit.git.infrastructure.repository.GitRepositoryRepository;

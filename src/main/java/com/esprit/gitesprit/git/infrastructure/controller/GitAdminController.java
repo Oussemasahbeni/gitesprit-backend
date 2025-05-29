@@ -1,11 +1,11 @@
-package com.esprit.gitesprit.git;
+package com.esprit.gitesprit.git.infrastructure.controller;
 
+import com.esprit.gitesprit.git.domain.service.GitRepositoryService;
 import com.esprit.gitesprit.git.domain.enums.ContentType;
 import com.esprit.gitesprit.git.domain.model.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.springframework.beans.factory.annotation.Autowired; // Can remove this if only using @RequiredArgsConstructor
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
