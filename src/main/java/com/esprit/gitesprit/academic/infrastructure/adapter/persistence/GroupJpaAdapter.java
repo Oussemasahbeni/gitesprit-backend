@@ -29,6 +29,7 @@ public class GroupJpaAdapter implements Groups {
     public Group create(Group group) {
         GroupEntity groupEntity = groupMapper.toEntity(group);
         GroupEntity savedAcademicEntity = groupRepository.save(groupEntity);
+        System.out.println(savedAcademicEntity +"hello");
         return groupMapper.toModel(savedAcademicEntity);
     }
 

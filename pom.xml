@@ -169,6 +169,70 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.43.0</version> <!-- Use the latest appropriate version -->
+                <configuration>
+                    <!-- optional: limit format enforcement to just the files changed by this feature branch -->
+                    <ratchetFrom>origin/develop</ratchetFrom>
+                    <java>
+                        <!--
+                          Define a sequence of steps that Spotless will apply to your Java files.
+                          See https://github.com/diffplug/spotless/tree/main/plugin-maven#java
+                        -->
+                        <includes>
+                            <include>src/main/java/**/*.java</include>
+                            <include>src/test/java/**/*.java</include>
+                        </includes>
+
+                        <!-- Apply import ordering -->
+                        <importOrder />
+
+                        <!-- Remove unused imports -->
+                        <removeUnusedImports />
+
+                        <!-- Support for // spotless:off and // spotless:on -->
+                        <toggleOffOn/>
+
+                        <!-- Trim trailing whitespace -->
+                        <trimTrailingWhitespace/>
+
+                        <!-- End files with a newline character -->
+                        <endWithNewline/>
+
+                        <!-- Configure indentation (example: using spaces) -->
+                        <!--
+                        <indent>
+                            <spaces>true</spaces>
+                            <spacesPerTab>4</spacesPerTab>
+                        </indent>
+                        -->
+                        <!-- Or using tabs as per your original example -->
+                        <indent>
+                            <tabs>true</tabs>
+                            <spacesPerTab>4</spacesPerTab>
+                        </indent>
+
+                        <!-- Apply Palantir Java Format (https://github.com/palantir/palantir-java-format) -->
+                        <palantirJavaFormat>
+                            <!-- <version>1.1.0</version> --> <!-- Optional: specify version -->
+                        </palantirJavaFormat>
+                        <!--
+                          You can add other formatters like googleJavaFormat, eclipseWtp, prettier, etc.
+                          <googleJavaFormat/>
+                        -->
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal> <!-- or 'apply' to auto-format -->
+                        </goals>
+                        <phase>compile</phase> <!-- Run during the compile phase -->
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
@@ -224,6 +288,22 @@
                         </indent>
                         <palantirJavaFormat/>
                     </java>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.30</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>

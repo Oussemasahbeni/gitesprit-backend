@@ -2,13 +2,17 @@ package com.esprit.gitesprit.academic.infrastructure.controller;
 
 import com.esprit.gitesprit.academic.domain.model.Group;
 import com.esprit.gitesprit.academic.domain.port.input.GroupUseCases;
+import com.esprit.gitesprit.academic.domain.port.output.Subjects;
 import com.esprit.gitesprit.academic.infrastructure.dto.request.AddGroupDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.request.UpdateGroupDto;
 import com.esprit.gitesprit.academic.infrastructure.dto.response.GroupDto;
 import com.esprit.gitesprit.academic.infrastructure.dto.response.GroupSimpleDto;
 import com.esprit.gitesprit.academic.infrastructure.mapper.GroupMapper;
 import com.esprit.gitesprit.shared.pagination.CustomPage;
 import com.esprit.gitesprit.shared.pagination.PageMapper;
 import com.esprit.gitesprit.shared.pagination.PaginationUtils;
+import com.esprit.gitesprit.users.domain.model.User;
+import com.esprit.gitesprit.users.domain.port.output.Users;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +29,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/groups")
@@ -35,11 +42,43 @@ public class GroupController {
     private final GroupUseCases groupUseCases;
     private final GroupMapper groupMapper;
 
+    private final Users users;
+    private final Subjects subjects;
+
     @PostMapping
     public ResponseEntity<GroupSimpleDto> create(@RequestBody @Valid AddGroupDto dto){
         Group group = groupMapper.toModelFromDto(dto);
+
         Group savedGroup = groupUseCases.create(group, dto.subjectId());
+
+        if (dto.studentIds() != null && !dto.studentIds().isEmpty()) {
+            groupUseCases.assignStudents(savedGroup.getId(), dto.studentIds());
+        }
+
+        if (dto.githubRepoFullName() != null) {
+            savedGroup.setGithubRepoFullName(dto.githubRepoFullName());
+            groupUseCases.update(savedGroup);
+        }
         return ResponseEntity.ok(groupMapper.toSimpleDto(savedGroup));
+    }
+    @PutMapping
+    public ResponseEntity<GroupSimpleDto> update(@RequestBody @Valid UpdateGroupDto dto) {
+
+        Group group = groupMapper.toModelFromUpdateDto(dto);
+
+        group.setSubject(subjects.findById(dto.subjectId()).orElseThrow());
+
+
+        if (dto.studentIds() != null) {
+            Set<User> students = dto.studentIds().stream()
+                    .map(id -> users.findById(id).orElseThrow())
+                    .collect(Collectors.toSet());
+            group.setStudents(students);
+        }
+
+        // Update and return
+        Group updated = groupUseCases.update(group);
+        return ResponseEntity.ok(groupMapper.toSimpleDto(updated));
     }
 
     @GetMapping("/{id}")
@@ -98,4 +137,50 @@ public class GroupController {
         List<GroupDto> groups = groupUseCases.findAll().stream().map(groupMapper::toResponseDto).toList();
         return ResponseEntity.ok(groups);
     }
+
+    @PatchMapping("/{groupId}/students")
+    public ResponseEntity<GroupDto> assignStudents(
+            @PathVariable UUID groupId,
+            @RequestBody List<UUID> studentIds
+    ) {
+        Group group = groupUseCases.assignStudents(groupId, studentIds);
+        return ResponseEntity.ok(groupMapper.toResponseDto(group));
+    }
+
+    @PatchMapping("/{groupId}/students/{studentId}")
+    public ResponseEntity<GroupDto> assignStudent(
+            @PathVariable UUID groupId,
+            @PathVariable UUID studentId
+    ) {
+        Group group = groupUseCases.assignStudent(groupId, studentId);
+        return ResponseEntity.ok(groupMapper.toResponseDto(group));
+    }
+
+    @DeleteMapping("/{groupId}/students/{studentId}")
+    public ResponseEntity<GroupDto> removeStudent(
+            @PathVariable UUID groupId,
+            @PathVariable UUID studentId
+    ) {
+        Group group = groupUseCases.removeStudent(groupId, studentId);
+        return ResponseEntity.ok(groupMapper.toResponseDto(group));
+    }
+
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<Void> deleteGroup(@PathVariable UUID groupId) {
+        groupUseCases.deleteById(groupId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{groupId}/repo")
+    public ResponseEntity<GroupSimpleDto> updateGroupGithubRepo(
+            @PathVariable UUID groupId,
+            @RequestBody Map<String, String> body
+    ) {
+        String githubRepoFullName = body.get("githubRepoFullName");
+        Group group = groupUseCases.findById(groupId);
+        group.setGithubRepoFullName(githubRepoFullName != null && !githubRepoFullName.isBlank() ? githubRepoFullName : null);
+        Group updated = groupUseCases.update(group);
+        return ResponseEntity.ok(groupMapper.toSimpleDto(updated));
+    }
+
 }

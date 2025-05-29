@@ -43,4 +43,8 @@ public class GroupEntity extends AbstractAuditingEntity {
     )
     @JsonManagedReference
     private Set<UserEntity> students = new HashSet<>();
+
+    @Column(name = "github_repo_full_name")
+    private String githubRepoFullName;
+
 }

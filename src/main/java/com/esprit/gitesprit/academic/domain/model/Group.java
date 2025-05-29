@@ -23,6 +23,7 @@ public class Group extends AbstractAuditingModel {
     private String name;
     private Subject subject;
     private Set<User> students;
+    private String githubRepoFullName;
 
     public void addStudent(User student) {
         if (students == null) {

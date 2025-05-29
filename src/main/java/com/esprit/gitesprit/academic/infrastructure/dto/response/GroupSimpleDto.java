@@ -14,4 +14,5 @@ public record GroupSimpleDto(
         Short version,
         UUID id,
         String name,
-        List<UserDto> students){}
+        List<UserDto> students,
+        String githubRepoFullName){}

@@ -2,6 +2,7 @@ package com.esprit.gitesprit.academic.infrastructure.mapper;
 
 import com.esprit.gitesprit.academic.domain.model.Group;
 import com.esprit.gitesprit.academic.infrastructure.dto.request.AddGroupDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.request.UpdateGroupDto;
 import com.esprit.gitesprit.academic.infrastructure.dto.response.GroupDto;
 import com.esprit.gitesprit.academic.infrastructure.dto.response.GroupSimpleDto;
 import com.esprit.gitesprit.academic.infrastructure.entity.GroupEntity;
@@ -30,6 +31,7 @@ public interface GroupMapper {
 
   Group toModelFromDto(AddGroupDto groupDto);
 
+  Group toModelFromUpdateDto(UpdateGroupDto dto);
   // Group toModelFromUpdateDto( groupDto);
 
   GroupSimpleDto toSimpleDto(Group group);

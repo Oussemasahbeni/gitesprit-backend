@@ -30,6 +30,7 @@ public class GroupService implements GroupUseCases {
                 () -> new NotFoundException(NotFoundException.NotFoundExceptionType.SUBJECT_NOT_FOUND)
         );
         group.setSubject(subject);
+
         return groups.create(group);
     }
 

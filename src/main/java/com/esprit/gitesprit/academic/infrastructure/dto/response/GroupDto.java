@@ -15,5 +15,6 @@ public record GroupDto(
         UUID id,
         String name,
         List<UserDto> students,
-        SubjectSimpleDto subject
+        SubjectSimpleDto subject,
+        String githubRepoFullName
 ) {}
