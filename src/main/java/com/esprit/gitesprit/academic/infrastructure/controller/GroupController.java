@@ -98,4 +98,10 @@ public class GroupController {
         List<GroupDto> groups = groupUseCases.findAll().stream().map(groupMapper::toResponseDto).toList();
         return ResponseEntity.ok(groups);
     }
+
+    @GetMapping("/all/{studentId}")
+    public ResponseEntity<List<GroupDto>> findAllByStudentId(@PathVariable UUID studentId) {
+        List<GroupDto> groups = groupUseCases.findAllByStudentId(studentId).stream().map(groupMapper::toResponseDto).toList();
+        return ResponseEntity.ok(groups);
+    }
 }

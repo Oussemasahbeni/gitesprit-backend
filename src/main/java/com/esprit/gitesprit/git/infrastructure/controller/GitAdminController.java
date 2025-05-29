@@ -13,10 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.HandlerMapping;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/repos")
@@ -39,6 +36,27 @@ public class GitAdminController {
             } else {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Repository '" + repoName + ".git' already exists.");
             }
+        } catch (IOException | GitAPIException e) {
+            e.printStackTrace(); // Log this properly using a logger (e.g., Slf4j)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error creating repository: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/{repoName}/{groupId}")
+    public ResponseEntity<String> createRepositoryWithGroup(@PathVariable String repoName, @PathVariable UUID groupId) {
+        try {
+            // Basic validation for repository name
+            if (repoName == null || repoName.trim().isEmpty() || !repoName.matches("^[a-zA-Z0-9_-]+$")) {
+                return ResponseEntity.badRequest().body("Invalid repository name. Use A-Z, a-z, 0-9, _, -.");
+            }
+
+            boolean created = gitRepositoryService.createRepositoryWithGroup(repoName, groupId);
+            String body = "Repository '" + repoName + ".git' created successfully.";
+            if (!created) {
+                body = "Repository '" + repoName + ".git' already exists.";
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).body(body);
         } catch (IOException | GitAPIException e) {
             e.printStackTrace(); // Log this properly using a logger (e.g., Slf4j)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -198,7 +198,7 @@ public class JGitServletConfig {
                         GitRepositoryEntity newRepo = new GitRepositoryEntity();
                         newRepo.setRepositoryName(repoName);
                         newRepo.setRepositoryPath(repoDir.getAbsolutePath());
-                        gitRepositoryRepository.save(newRepo);
+                        //gitRepositoryRepository.save(newRepo);
                         resolverLog.info("Saved auto-created repository to database: {}", repoName);
 
                     } catch (GitAPIException | IOException e) {

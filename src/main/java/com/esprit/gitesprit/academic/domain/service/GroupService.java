@@ -104,6 +104,11 @@ public class GroupService implements GroupUseCases {
     }
 
     @Override
+    public List<Group> findAllByStudentId(UUID studentId) {
+        return groups.findAllByStudentId(studentId);
+    }
+
+    @Override
     public Page<Group> findAllPaginated(String search, Pageable pageable) {
         return groups.findAllPaginated(search, pageable);
     }

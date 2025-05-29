@@ -1,5 +1,6 @@
 package com.esprit.gitesprit.academic.domain.model;
 
+import com.esprit.gitesprit.git.domain.model.GitRepository;
 import com.esprit.gitesprit.shared.AbstractAuditingModel;
 import com.esprit.gitesprit.users.domain.model.User;
 import lombok.AllArgsConstructor;
@@ -8,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -23,6 +23,7 @@ public class Group extends AbstractAuditingModel {
     private String name;
     private Subject subject;
     private Set<User> students;
+    private Set<GitRepository> repositories ;
 
     public void addStudent(User student) {
         if (students == null) {
@@ -34,6 +35,19 @@ public class Group extends AbstractAuditingModel {
     public void removeStudent(User student) {
         if (students != null) {
             students.remove(student);
+        }
+    }
+
+    public void addRepository(GitRepository repository) {
+        if(repositories == null) {
+            repositories = new HashSet<>();
+        }
+        repositories.add(repository);
+    }
+
+    public void removeRepository(GitRepository repository) {
+        if(repositories != null) {
+            repositories.remove(repository);
         }
     }
 }

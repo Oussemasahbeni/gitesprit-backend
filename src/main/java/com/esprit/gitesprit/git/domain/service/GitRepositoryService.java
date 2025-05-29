@@ -1,13 +1,15 @@
 package com.esprit.gitesprit.git.domain.service;
 
+import com.esprit.gitesprit.academic.domain.model.Group;
+import com.esprit.gitesprit.academic.domain.port.output.Groups;
+import com.esprit.gitesprit.academic.infrastructure.entity.GroupEntity;
+import com.esprit.gitesprit.academic.infrastructure.repository.GroupRepository;
+import com.esprit.gitesprit.exception.NotFoundException;
 import com.esprit.gitesprit.git.domain.enums.ContentType;
-import com.esprit.gitesprit.git.domain.model.BranchInfo;
-import com.esprit.gitesprit.git.domain.model.CommitInfo;
-import com.esprit.gitesprit.git.domain.model.ContributorInfo;
-import com.esprit.gitesprit.git.domain.model.RepositoryStatistics;
+import com.esprit.gitesprit.git.domain.model.*;
+import com.esprit.gitesprit.git.domain.port.output.GitRepositories;
 import com.esprit.gitesprit.git.infrastructure.entity.GitRepositoryEntity;
 import com.esprit.gitesprit.git.infrastructure.repository.GitRepositoryRepository;
-import com.esprit.gitesprit.git.domain.model.RepositoryContent;
 
 import lombok.RequiredArgsConstructor;
 import org.eclipse.jgit.api.Git;
@@ -47,6 +49,8 @@ public class GitRepositoryService {
     private String repositoriesBasePath;
 
     private final GitRepositoryRepository gitRepositoryRepository;
+    private final GitRepositories gitRepositories;
+    private final Groups groups;
 
     // Helper method to open a JGit Repository object
     private Optional<Repository> openJGitRepository(String repoName) {
@@ -82,6 +86,61 @@ public class GitRepositoryService {
         }
     }
 
+    public boolean createRepositoryWithGroup(String repoName, UUID groupId) throws IOException, GitAPIException {
+        String fullRepoName = repoName;
+        if (!fullRepoName.endsWith(Constants.DOT_GIT_EXT)) {
+            fullRepoName += Constants.DOT_GIT_EXT;
+        }
+
+        Optional<GitRepositoryEntity> existingDbRepo = gitRepositoryRepository.findByRepositoryName(fullRepoName);
+        if (existingDbRepo.isPresent()) {
+            log.info("Repository '{}' already exists in database.", fullRepoName);
+            File repoDirFromDb = new File(existingDbRepo.get().getRepositoryPath());
+            if (repoDirFromDb.exists()) {
+                return false; // Repository already exists both in DB and on filesystem
+            } else {
+                log.warn("Inconsistency: Repository '{}' found in DB but not on filesystem. Path: {}. Attempting to remove from DB.", fullRepoName, existingDbRepo.get().getRepositoryPath());
+                gitRepositoryRepository.delete(existingDbRepo.get()); // Clean up inconsistent DB entry
+                // Proceed to create as if it didn't exist, as it's missing from FS
+            }
+        }
+
+        File repoDir = new File(repositoriesBasePath, fullRepoName);
+        if (repoDir.exists()) {
+            // Check if it's a valid Git repo before adding to DB
+            try (Repository checkRepo = new FileRepositoryBuilder().setGitDir(repoDir).readEnvironment().findGitDir().build()) {
+                log.info("Repository '{}' exists on filesystem but not in DB. Adding to DB.", fullRepoName);
+                Group group = groups.findById(groupId).orElseThrow(() -> new NotFoundException(NotFoundException.NotFoundExceptionType.GROUP_NOT_FOUND));
+                GitRepository entity = new GitRepository();
+                entity.setRepositoryName(fullRepoName);
+                entity.setRepositoryPath(repoDir.getAbsolutePath());
+                entity.setGroup(group);
+                gitRepositories.save(entity);
+                return false; // Already exists on filesystem
+            } catch (IOException e) {
+                log.error("Directory {} exists but is not a valid Git repository. Unable to add to DB.", repoDir.getAbsolutePath(), e);
+                return false; // Not a valid Git repo, can't manage it.
+            }
+        }
+
+        // Create a new bare repository on filesystem
+        try (Git git = Git.init().setDirectory(repoDir).setBare(true).call()) {
+            log.info("Created new bare repository on filesystem: {}", repoDir.getAbsolutePath());
+
+            // Save to database
+            GitRepository newRepo = new GitRepository();
+            newRepo.setRepositoryName(fullRepoName);
+            newRepo.setRepositoryPath(repoDir.getAbsolutePath());
+            Group group = groups.findById(groupId).orElseThrow(() -> new NotFoundException(NotFoundException.NotFoundExceptionType.GROUP_NOT_FOUND));
+            newRepo.setGroup(group);
+            gitRepositories.save(newRepo);
+            log.info("Saved repository to database: {}", fullRepoName);
+            return true;
+        } catch (GitAPIException e) {
+            log.error("Failed to create repository '{}': {}", fullRepoName, e.getMessage(), e);
+            throw e; // Re-throw for upstream handling
+        }
+    }
 
     public boolean createRepository(String repoName) throws IOException, GitAPIException {
         String fullRepoName = repoName;

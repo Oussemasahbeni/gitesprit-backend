@@ -1,5 +1,7 @@
 package com.esprit.gitesprit.academic.infrastructure.entity;
 
+import com.esprit.gitesprit.git.domain.model.GitRepository;
+import com.esprit.gitesprit.git.infrastructure.entity.GitRepositoryEntity;
 import com.esprit.gitesprit.shared.AbstractAuditingEntity;
 import com.esprit.gitesprit.users.infrastructure.entity.UserEntity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -43,4 +45,8 @@ public class GroupEntity extends AbstractAuditingEntity {
     )
     @JsonManagedReference
     private Set<UserEntity> students = new HashSet<>();
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private Set<GitRepositoryEntity> repositories = new HashSet<>();
 }

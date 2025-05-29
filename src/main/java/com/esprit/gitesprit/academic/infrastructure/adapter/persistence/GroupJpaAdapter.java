@@ -69,6 +69,11 @@ public class GroupJpaAdapter implements Groups {
     }
 
     @Override
+    public List<Group> findAllByStudentId(UUID studentId){
+        return groupRepository.findByStudentsId(studentId).stream().map(groupMapper::toModel).toList();
+    }
+
+    @Override
     public Page<Group> findAllPaginated(String search, Pageable pageable) {
         Specification<GroupEntity> spec = GroupSpecification.hasCriteria(search);
         return groupRepository.findAll(spec, pageable).map(groupMapper::toModel);
