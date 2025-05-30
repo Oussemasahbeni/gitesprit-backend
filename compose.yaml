@@ -1,5 +1,17 @@
 name: gitesprit
 services:
+  app:
+      build:
+        context: .
+      ports:
+        - "8082:8082"
+      env_file:
+        - .env
+      depends_on:
+        - postgres
+        - mail-dev
+      networks:
+        - pos-network
   postgres:
     container_name: postgres-sql-gitesprit
     image: postgres:17-alpine
