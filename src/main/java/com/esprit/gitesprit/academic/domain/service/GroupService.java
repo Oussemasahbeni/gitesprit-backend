@@ -112,4 +112,5 @@ public class GroupService implements GroupUseCases {
     private boolean checkStudentInGroup(Group group, UUID studentId) {
         return group.getStudents().stream().anyMatch(student -> student.getId().equals(studentId));
     }
+
 }

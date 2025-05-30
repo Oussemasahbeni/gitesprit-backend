@@ -183,4 +183,19 @@ public class GroupController {
         return ResponseEntity.ok(groupMapper.toSimpleDto(updated));
     }
 
+    @GetMapping("/my")
+    public ResponseEntity<GroupDto> getMyGroup(@RequestParam UUID userId) {
+        // Récupère tous les groupes
+        List<Group> groups = groupUseCases.findAll();
+        // Trouve le groupe où l'utilisateur est membre
+        Group myGroup = groups.stream()
+                .filter(g -> g.getStudents() != null && g.getStudents().stream().anyMatch(u -> u.getId().equals(userId)))
+                .findFirst()
+                .orElse(null);
+
+        if (myGroup == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(groupMapper.toResponseDto(myGroup));
+    }
 }
