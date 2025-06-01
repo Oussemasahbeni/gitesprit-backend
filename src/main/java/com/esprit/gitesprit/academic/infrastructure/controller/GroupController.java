@@ -104,4 +104,10 @@ public class GroupController {
         List<GroupDto> groups = groupUseCases.findAllByStudentId(studentId).stream().map(groupMapper::toResponseDto).toList();
         return ResponseEntity.ok(groups);
     }
+
+    @PatchMapping("/assign/{groupId}/{studentId}")
+    public ResponseEntity<GroupDto> assignStudent(@PathVariable UUID groupId, @PathVariable UUID studentId) {
+        Group group = groupUseCases.assignStudent(groupId, studentId);
+        return ResponseEntity.ok(groupMapper.toResponseDto(group));
+    }
 }

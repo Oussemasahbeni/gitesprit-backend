@@ -52,6 +52,10 @@ public class GitRepositoryService {
     private final GitRepositories gitRepositories;
     private final Groups groups;
 
+    public List<GitRepository> listGitRepositoriesByGroupId(UUID groupId) {
+        return gitRepositories.findAllByGroupId(groupId);
+    }
+
     // Helper method to open a JGit Repository object
     private Optional<Repository> openJGitRepository(String repoName) {
         String fullRepoName = repoName;

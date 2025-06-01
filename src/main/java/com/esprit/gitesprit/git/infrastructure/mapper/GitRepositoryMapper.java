@@ -1,6 +1,7 @@
 package com.esprit.gitesprit.git.infrastructure.mapper;
 
 import com.esprit.gitesprit.git.domain.model.GitRepository;
+import com.esprit.gitesprit.git.infrastructure.dto.RepositoryDto;
 import com.esprit.gitesprit.git.infrastructure.entity.GitRepositoryEntity;
 import com.esprit.gitesprit.shared.mapstruct.CycleAvoidingMappingContext;
 import com.esprit.gitesprit.shared.mapstruct.DoIgnore;
@@ -29,7 +30,7 @@ public interface GitRepositoryMapper {
 //
 //    //GitRepository toModelFromUpdateDto( gitRepositoryDto);
 //
-//    GitRepositoryDto toResponseDto(GitRepository gitRepository);
+    RepositoryDto toResponseDto(GitRepository gitRepository);
 //
 //    GitRepositorySimpleDto toSimpleDto(GitRepository gitRepository);
 }

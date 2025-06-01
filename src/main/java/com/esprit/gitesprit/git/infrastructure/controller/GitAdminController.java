@@ -3,6 +3,8 @@ package com.esprit.gitesprit.git.infrastructure.controller;
 import com.esprit.gitesprit.git.domain.service.GitRepositoryService;
 import com.esprit.gitesprit.git.domain.enums.ContentType;
 import com.esprit.gitesprit.git.domain.model.*;
+import com.esprit.gitesprit.git.infrastructure.dto.RepositoryDto;
+import com.esprit.gitesprit.git.infrastructure.mapper.GitRepositoryMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -21,6 +23,7 @@ import java.util.*;
 public class GitAdminController {
 
     private final GitRepositoryService gitRepositoryService;
+    private final GitRepositoryMapper gitRepositoryMapper;
 
     @PostMapping("/{repoName}")
     public ResponseEntity<String> createRepository(@PathVariable String repoName) {
@@ -68,6 +71,18 @@ public class GitAdminController {
     public ResponseEntity<List<String>> listRepositories() {
         try {
             return ResponseEntity.ok(gitRepositoryService.listRepositories());
+        } catch (Exception e) { // Catch generic exception as listRepositories no longer throws IOException
+            e.printStackTrace(); // Log this properly
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null); // Or an error object
+        }
+    }
+
+    @GetMapping("/{groupId}")
+    public ResponseEntity<List<String>> listRepositoryNamesByGroupId(@PathVariable UUID groupId) {
+        try {
+            List<GitRepository> repos = gitRepositoryService.listGitRepositoriesByGroupId(groupId);
+            return ResponseEntity.ok(repos.stream().map(GitRepository::getRepositoryName).toList());
         } catch (Exception e) { // Catch generic exception as listRepositories no longer throws IOException
             e.printStackTrace(); // Log this properly
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

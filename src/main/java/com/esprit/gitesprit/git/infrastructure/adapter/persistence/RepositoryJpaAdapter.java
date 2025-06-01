@@ -9,6 +9,9 @@ import com.esprit.gitesprit.shared.annotation.PersistenceAdapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.UUID;
+
 @PersistenceAdapter
 @RequiredArgsConstructor
 @Transactional
@@ -22,5 +25,10 @@ public class RepositoryJpaAdapter implements GitRepositories {
         GitRepositoryEntity gitRepositoryEntity = gitRepositoryMapper.toEntity(gitRepository);
         GitRepositoryEntity savedAcademicEntity = gitRepositoryRepository.save(gitRepositoryEntity);
         return gitRepositoryMapper.toModel(savedAcademicEntity);
+    }
+
+    @Override
+    public List<GitRepository> findAllByGroupId(UUID groupID) {
+        return gitRepositoryRepository.findAllByGroupId(groupID).stream().map(gitRepositoryMapper::toModel).toList();
     }
 }
