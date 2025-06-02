@@ -15,4 +15,6 @@ public record SubjectSimpleDto(
         Short version,
         UUID id,
         String name,
+        Double groupMarkPercentage,
+        Double individualMarkPercentage,
         UserDto teacher) {}

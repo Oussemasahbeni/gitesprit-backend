@@ -3,6 +3,7 @@ package com.esprit.gitesprit.academic.infrastructure.controller;
 import com.esprit.gitesprit.academic.domain.model.Group;
 import com.esprit.gitesprit.academic.domain.port.input.GroupUseCases;
 import com.esprit.gitesprit.academic.infrastructure.dto.request.AddGroupDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.request.GroupMarkDto;
 import com.esprit.gitesprit.academic.infrastructure.dto.response.GroupDto;
 import com.esprit.gitesprit.academic.infrastructure.dto.response.GroupSimpleDto;
 import com.esprit.gitesprit.academic.infrastructure.mapper.GroupMapper;
@@ -97,5 +98,44 @@ public class GroupController {
     public ResponseEntity<List<GroupDto>> findAll() {
         List<GroupDto> groups = groupUseCases.findAll().stream().map(groupMapper::toResponseDto).toList();
         return ResponseEntity.ok(groups);
+    }
+
+    @GetMapping("/all/{studentId}")
+    public ResponseEntity<List<GroupDto>> findAllByStudentId(@PathVariable UUID studentId) {
+        List<GroupDto> groups = groupUseCases.findAllByStudentId(studentId).stream().map(groupMapper::toResponseDto).toList();
+        return ResponseEntity.ok(groups);
+    }
+
+    @PatchMapping("/assign/{groupId}/{studentId}")
+    public ResponseEntity<GroupDto> assignStudent(@PathVariable UUID groupId, @PathVariable UUID studentId) {
+        Group group = groupUseCases.assignStudent(groupId, studentId);
+        return ResponseEntity.ok(groupMapper.toResponseDto(group));
+    }
+
+    @PutMapping("/{groupId}/mark")
+    @Operation(summary = "Add or update a mark for a group", description = "Assigns a mark to a group with optional comments")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Mark successfully assigned or updated",
+                            content = @Content(
+                                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                    schema = @Schema(implementation = GroupDto.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid mark data", content = @Content),
+                    @ApiResponse(responseCode = "404", description = "Group not found", content = @Content),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+            })
+    public ResponseEntity<GroupDto> addMarkToGroup(
+            @Parameter(description = "ID of the group to mark", required = true)
+            @PathVariable UUID groupId,
+            @Valid @RequestBody GroupMarkDto markDto) {
+
+        Group group = groupUseCases.findById(groupId);
+        group.setMark(markDto.getMark());
+        group.setComment(markDto.getComment());
+        Group updatedGroup = groupUseCases.update(group);
+
+        return ResponseEntity.ok(groupMapper.toResponseDto(updatedGroup));
     }
 }

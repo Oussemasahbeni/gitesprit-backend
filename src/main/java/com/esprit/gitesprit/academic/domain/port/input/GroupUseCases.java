@@ -28,5 +28,7 @@ public interface GroupUseCases {
 
     List<Group> findAll();
 
+    List<Group> findAllByStudentId(UUID studentId);
+
     Page<Group> findAllPaginated(String search, Pageable pageable);
 }

@@ -1,5 +1,7 @@
 package com.esprit.gitesprit.academic.infrastructure.entity;
 
+import com.esprit.gitesprit.git.domain.model.GitRepository;
+import com.esprit.gitesprit.git.infrastructure.entity.GitRepositoryEntity;
 import com.esprit.gitesprit.shared.AbstractAuditingEntity;
 import com.esprit.gitesprit.users.infrastructure.entity.UserEntity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -35,12 +37,19 @@ public class GroupEntity extends AbstractAuditingEntity {
     @JsonBackReference
     private SubjectEntity subject;
 
-    @ManyToMany
-    @JoinTable(
-            name = "group_students",
-            joinColumns = @JoinColumn(name = "group_id"),
-            inverseJoinColumns = @JoinColumn(name = "student_id")
-    )
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private Set<UserEntity> students = new HashSet<>();
+    private Set<GroupStudentEntity> students = new HashSet<>();
+
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private Set<GitRepositoryEntity> repositories = new HashSet<>();
+
+    @Column(name = "marks")
+    private Double mark;
+
+    @Column(name = "comments", columnDefinition = "TEXT")
+    private String comment;
+
 }
+

@@ -1,8 +1,16 @@
 spring:
   profiles:
     active: prod
+  cloud:
+      azure:
+        storage:
+          blob:
+            account-name: ${AZURE_ACCOUNT_NAME}
+            account-key: ${AZURE_ACCOUNT_KEY}
+            connection-string: ${AZURE_CONNECTION_STRING}
+            endpoint: ${AZURE_ENDPOINT}
   application:
-    name: gitesprit
+    name: git-esprit
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -66,28 +74,35 @@ spring:
     virtual-host: /
     ssl:
       enabled: false
-
+  ai:
+    openai:
+      api-key: ${GEMINI_API_KEY}
+      chat:
+        base-url: https://generativelanguage.googleapis.com
+        completions-path: /v1beta/openai/chat/completions
+        options:
+          model: gemini-2.5-flash-preview-04-17
   threads:
     virtual:
       enabled: true
 
 
-
 keycloak:
   realm: ${KEYCLOAK_REALM}
-  client: ${KEYCLOAK_CLIENT_ID}
-  url: ${KEYCLOAK_URL}
-  credentials:
-    secret: ${KEYCLOAK_CLIENT_SECRET}
-
+  client-id: ${KEYCLOAK_CLIENT_ID}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}
+  server-url: ${KEYCLOAK_URL}
 
 application:
-  frontend:
-    url: ${FRONTEND_URL}
-  backend:
-    url: ${BACKEND_URL}
+  frontend-url: ${FRONTEND_URL}
+  backend-url: ${BACKEND_URL}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  open-api:
+    enabled: true
+    api-version: 1.0.0
+    title: Git Esprit
+    description: Git Esprit backend application
   websocket:
     endpoint: "/ws"
     allowed-origins: ${FRONTEND_URL}
@@ -106,29 +121,44 @@ springdoc:
       client-id: ${KEYCLOAK_CLIENT_ID}
       client-secret: ${KEYCLOAK_CLIENT_SECRET}
       scopes: openid profile
-    oauth2-redirect-url: ${application.backend.url}/swagger-ui/oauth2-redirect.html
+    oauth2-redirect-url: ${application.backend-url}/swagger-ui/oauth2-redirect.html
   default-produces-media-type: application/json
+
+git:
+  server:
+    repos:
+     path: ./repositories
+     auto-create-on-push: true
 
 server:
   port: 8082
 
 logging:
   level:
-    org.springframework.security: DEBUG
+    org.springframework.security: DEBUG # Keep DEBUG or TRACE
+    org.eclipse.jgit: DEBUG # Keep DEBUG or TRACE
+    com.esprit.gitesprit: DEBUG # Your app's root package
 
-#management:
-#  metrics:
-#    distribution:
-#      percentiles-histogram:
-#        http.server.requests: true
-#  endpoints:
-#    web:
-#      exposure:
-#        include: health,prometheus
-#  endpoint:
-#    health:
-#      show-details: always
-#  prometheus:
-#    metrics:
-#      export:
-#        enabled: true
+
+management:
+  metrics:
+    distribution:
+      percentiles-histogram:
+        all: true
+    enable:
+        all: true
+  endpoints:
+    web:
+      exposure:
+        include: info,health,prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+    enabled: true

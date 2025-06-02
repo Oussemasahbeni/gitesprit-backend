@@ -66,8 +66,11 @@ public class NotFoundException extends ApplicationException {
         LOG_ENTRY_NOT_FOUND(
                 "error.server.not-found.log-entry.title",
                 "error.server.not-found.log-entry.msg",
-                "Log entry not found : {0}");
-
+                "Log entry not found : {0}"),
+        GENERIC_NOT_FOUND(
+                "error.server.not-found.generic.title",
+                "error.server.not-found.generic.msg",
+                "Resource not found : {0}");
         private final String messageKey;
         private final String titleKey;
         private final String messageCause;

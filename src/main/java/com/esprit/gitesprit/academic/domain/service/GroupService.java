@@ -1,9 +1,10 @@
 package com.esprit.gitesprit.academic.domain.service;
 
 import com.esprit.gitesprit.academic.domain.model.Group;
+import com.esprit.gitesprit.academic.domain.model.GroupStudent;
 import com.esprit.gitesprit.academic.domain.model.Subject;
 import com.esprit.gitesprit.academic.domain.port.input.GroupUseCases;
-import com.esprit.gitesprit.academic.domain.port.input.SubjectUseCases;
+import com.esprit.gitesprit.academic.domain.port.output.GroupStudents;
 import com.esprit.gitesprit.academic.domain.port.output.Groups;
 import com.esprit.gitesprit.academic.domain.port.output.Subjects;
 import com.esprit.gitesprit.exception.NotFoundException;
@@ -23,6 +24,7 @@ public class GroupService implements GroupUseCases {
     private final Groups groups;
     private final Users users;
     private final Subjects subjects;
+    private final GroupStudents groupStudents;
 
     @Override
     public Group create(Group group, UUID subjectId) {
@@ -45,12 +47,19 @@ public class GroupService implements GroupUseCases {
         User student = users.findById(studentId).orElseThrow(
                 () -> new NotFoundException(NotFoundException.NotFoundExceptionType.USER_NOT_FOUND)
         );
-        if (group.getStudents().contains(student)) {
+
+        // Check if student is already in the group
+        if (group.getStudents().stream().anyMatch(s -> s.getId().equals(studentId))) {
             return group;
         }
-        group.addStudent(student);
-        groups.update(group);
-        return group;
+
+        // Create new GroupStudent entity and add to group
+        GroupStudent groupStudent = new GroupStudent();
+        groupStudent.setStudent(student);
+        groupStudent.setGroup(group);
+        group.addGroupStudent(groupStudent);
+
+        return groups.update(group);
     }
 
     @Override
@@ -59,12 +68,9 @@ public class GroupService implements GroupUseCases {
         User student = users.findById(studentId).orElseThrow(
                 () -> new NotFoundException(NotFoundException.NotFoundExceptionType.USER_NOT_FOUND)
         );
-        if (!checkStudentInGroup(group, studentId)) {
-            return group;
-        }
+
         group.removeStudent(student);
-        groups.update(group);
-        return group;
+        return groups.update(group);
     }
 
     @Override
@@ -74,17 +80,25 @@ public class GroupService implements GroupUseCases {
             User student = users.findById(studentId).orElseThrow(
                     () -> new NotFoundException(NotFoundException.NotFoundExceptionType.USER_NOT_FOUND)
             );
-            if (!group.getStudents().contains(student)) {
-                group.addStudent(student);
+
+            // Check if student is already in the group
+            if (group.getStudents().stream().noneMatch(s -> s.getId().equals(studentId))) {
+                // Create new GroupStudent entity and add to group
+                GroupStudent groupStudent = new GroupStudent();
+                groupStudent.setStudent(student);
+                groupStudent.setGroup(group);
+                group.addGroupStudent(groupStudent);
             }
         }
-        groups.update(group);
-        return group;
+
+        return groups.update(group);
     }
 
     @Override
     public Group findById(UUID id) {
-        return groups.findById(id).orElseThrow(() -> new NotFoundException(NotFoundException.NotFoundExceptionType.GROUP_NOT_FOUND));
+        return groups.findById(id).orElseThrow(
+                () -> new NotFoundException(NotFoundException.NotFoundExceptionType.GROUP_NOT_FOUND)
+        );
     }
 
     @Override
@@ -104,11 +118,17 @@ public class GroupService implements GroupUseCases {
     }
 
     @Override
+    public List<Group> findAllByStudentId(UUID studentId) {
+        return groups.findAllByStudentId(studentId);
+    }
+
+    @Override
     public Page<Group> findAllPaginated(String search, Pageable pageable) {
         return groups.findAllPaginated(search, pageable);
     }
 
     private boolean checkStudentInGroup(Group group, UUID studentId) {
-        return group.getStudents().stream().anyMatch(student -> student.getId().equals(studentId));
+        return group.getStudents().stream()
+                .anyMatch(student -> student.getId().equals(studentId));
     }
 }

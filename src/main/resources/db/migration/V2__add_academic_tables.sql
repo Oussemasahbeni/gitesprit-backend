@@ -24,12 +24,7 @@ CREATE TABLE classes
     CONSTRAINT pk_classes PRIMARY KEY (id)
 );
 
-CREATE TABLE group_students
-(
-    group_id   UUID NOT NULL,
-    student_id UUID NOT NULL,
-    CONSTRAINT pk_group_students PRIMARY KEY (group_id, student_id)
-);
+
 
 CREATE TABLE groups
 (
@@ -41,8 +36,27 @@ CREATE TABLE groups
     version          SMALLINT     NOT NULL,
     name             VARCHAR(255) NOT NULL,
     subject_id       UUID         NOT NULL,
+    marks INTEGER DEFAULT 0,
+    comments TEXT,
     CONSTRAINT pk_groups PRIMARY KEY (id)
 );
+
+CREATE TABLE IF NOT EXISTS group_students (
+                                              id UUID PRIMARY KEY,
+                                              created_by       VARCHAR(255),
+    last_modified_by VARCHAR(255),
+    created_at       TIMESTAMP WITHOUT TIME ZONE,
+    updated_at       TIMESTAMP WITHOUT TIME ZONE,
+    version          SMALLINT     NOT NULL,
+    student_id UUID NOT NULL,
+    group_id UUID NOT NULL,
+    individual_mark DOUBLE PRECISION,
+    individual_comment TEXT,
+    CONSTRAINT uk_student_group UNIQUE (student_id, group_id),
+    CONSTRAINT fk_student_group_marks_student FOREIGN KEY (student_id) REFERENCES users(id),
+    CONSTRAINT fk_student_group_marks_group FOREIGN KEY (group_id) REFERENCES groups(id)
+);
+
 
 CREATE TABLE subjects
 (
@@ -55,6 +69,8 @@ CREATE TABLE subjects
     name             VARCHAR(255) NOT NULL,
     classroom_id     UUID,
     teacher_id       UUID,
+    group_mark_percentage DECIMAL(5,2)  NOT NULL,
+    individual_mark_percentage DECIMAL(5,2)  NOT NULL,
     CONSTRAINT pk_subjects PRIMARY KEY (id)
 );
 

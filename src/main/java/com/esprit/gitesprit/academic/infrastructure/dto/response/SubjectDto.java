@@ -15,6 +15,8 @@ public record SubjectDto(
         UUID id,
         String name,
         UserDto teacher,
+        Double groupMarkPercentage,
+        Double individualMarkPercentage,
         ClassroomSimpleDto classroom,
         List<GroupSimpleDto> groups
 ) {}

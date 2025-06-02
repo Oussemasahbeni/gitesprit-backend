@@ -14,6 +14,25 @@ public record GroupDto(
         Short version,
         UUID id,
         String name,
-        List<UserDto> students,
+        Double mark,
+        String comment,
+        List<GroupStudentDto> students,
         SubjectSimpleDto subject
-) {}
+) {
+
+    public record GroupStudentDto(
+            UUID id,
+            StudentDto student,
+            Double individualMark,
+            String individualComment,
+            Double finalMark
+    ) {
+        public record StudentDto(
+                String firstName,
+                String lastName,
+                String fullName,
+                String username,
+                String email
+        ){}
+    }
+}

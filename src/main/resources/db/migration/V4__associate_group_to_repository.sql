@@ -1,0 +1,5 @@
+ALTER TABLE git_repository
+    ADD COLUMN group_id UUID NOT NULL;
+
+ALTER TABLE git_repository
+    ADD CONSTRAINT FK_GIT_REPOSITORY_ON_GROUP FOREIGN KEY (group_id) REFERENCES groups (id);

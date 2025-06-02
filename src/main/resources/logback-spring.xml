@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Include base Spring Boot Logback config -->
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <!-- Fetch application name from properties -->
+    <springProperty scope="context" name="appName" source="spring.application.name"/>
+
+    <!-- Loki4j Appender -->
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <http>
+            <!-- Loki URL -->
+            <url>http://localhost:3100/loki/api/v1/push</url>
+        </http>
+
+        <format>
+            <!-- Labels to be sent with logs -->
+            <label>
+                <!-- Custom label pattern -->
+                <pattern>application=${appName},host=${HOSTNAME:-unknown},level=%level</pattern>
+            </label>
+
+            <!-- Log message pattern -->
+            <message>
+                <!-- Fallback if FILE_LOG_PATTERN is undefined -->
+                <pattern>${FILE_LOG_PATTERN:-%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n}</pattern>
+            </message>
+
+            <!-- Sort entries before sending to Loki -->
+            <sortByTime>true</sortByTime>
+        </format>
+    </appender>
+
+    <!-- Send root logs to Loki -->
+    <root level="INFO">
+        <appender-ref ref="LOKI"/>
+    </root>
+</configuration>
