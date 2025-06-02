@@ -1,5 +1,8 @@
 [core]
+<<<<<<< HEAD
 	symlinks = false
+=======
+>>>>>>> e62794b1abef3e6e53b0ef141b312a7526662500
 	repositoryformatversion = 0
 	filemode = false
 	bare = true

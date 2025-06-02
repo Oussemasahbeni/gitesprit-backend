@@ -43,4 +43,11 @@ public class SubjectEntity extends AbstractAuditingEntity {
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<GroupEntity> groups = new ArrayList<>();
+
+    @Column(name = "group_mark_percentage")
+    private Double groupMarkPercentage;
+
+    @Column(name = "individual_mark_percentage")
+    private Double individualMarkPercentage;
 }
+

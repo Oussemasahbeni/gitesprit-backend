@@ -1,17 +1,5 @@
 name: gitesprit
 services:
-  app:
-      build:
-        context: .
-      ports:
-        - "8082:8082"
-      env_file:
-        - .env
-      depends_on:
-        - postgres
-        - mail-dev
-      networks:
-        - pos-network
   postgres:
     container_name: postgres-sql-gitesprit
     image: postgres:17-alpine
@@ -94,6 +82,19 @@ services:
       volumes:
         - ./monitoring/grafana/dashboards:/etc/grafana/dashboards
         - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      environment:
+        - GF_SMTP_ENABLED=true
+        - GF_SMTP_HOST=mail-dev:1025
+        # - GF_SMTP_USER=             # Not needed for MailDev
+        # - GF_SMTP_PASSWORD=         # Not needed for MailDev
+        - GF_SMTP_SKIP_VERIFY=true
+        - GF_SMTP_FROM_ADDRESS=grafana-alerts@example.com
+        - GF_SMTP_FROM_NAME=Grafana Alerts
+        - GF_SMTP_STARTTLS_POLICY=NoStartTLS # Important for MailDev
+        # For Unified Alerting (Grafana 8+)
+        - GF_UNIFIED_ALERTING_ENABLED=true
+      depends_on:
+          - mail-dev # if maildev is also in this compose file
       networks:
         - gitesprit-network
   loki:

@@ -11,6 +11,7 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface SubjectMapper {
+
   SubjectEntity mapToEntity(Subject subject, @Context CycleAvoidingMappingContext context);
 
   Subject mapToModel(SubjectEntity subjectEntity, @Context CycleAvoidingMappingContext context);
