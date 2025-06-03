@@ -70,8 +70,8 @@ public class GroupJpaAdapter implements Groups {
 
     @Override
     public List<Group> findAllByStudentId(UUID studentId){
-//        return groupRepository.findByStudentsId(studentId).stream().map(groupMapper::toModel).toList();
-        return null;
+        return groupRepository.findByStudentId(studentId).stream().map(groupMapper::toModel).toList();
+        //return null;
     }
 
     @Override
