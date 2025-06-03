@@ -28,6 +28,7 @@ public record GroupDto(
             Double finalMark
     ) {
         public record StudentDto(
+                UUID id,
                 String firstName,
                 String lastName,
                 String fullName,
