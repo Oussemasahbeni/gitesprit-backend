@@ -25,7 +25,8 @@ public record GroupDto(
             StudentDto student,
             Double individualMark,
             String individualComment,
-            Double finalMark
+            Double finalMark,
+            List<TaskDto> tasks
     ) {
         public record StudentDto(
                 UUID id,

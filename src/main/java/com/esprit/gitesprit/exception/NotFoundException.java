@@ -63,6 +63,10 @@ public class NotFoundException extends ApplicationException {
                 "error.server.not-found.group.title",
                 "error.server.not-found.group.msg",
                 "Group not found : {0}"),
+        TASK_NOT_FOUND(
+                "error.server.not-found.task.title",
+                "error.server.not-found.task.msg",
+                "Task not found : {0}"),
         LOG_ENTRY_NOT_FOUND(
                 "error.server.not-found.log-entry.title",
                 "error.server.not-found.log-entry.msg",

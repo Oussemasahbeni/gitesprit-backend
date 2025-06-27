@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -22,6 +23,7 @@ public class GroupStudent extends AbstractAuditingModel {
     private Double individualMark;
     private String individualComment;
     private Double finalMark;
+    private List<Task> tasks;
 
     public Double getFinalMark() {
         if (group == null || group.getSubject() == null || individualMark == null || group.getMark() == null) {
