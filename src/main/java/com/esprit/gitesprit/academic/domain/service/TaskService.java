@@ -39,6 +39,20 @@ public class TaskService implements TaskUseCases {
     }
 
     @Override
+    public Task assignBranch(UUID id, List<String> links) {
+        Task task = findById(id);
+        task.setBranchLinks(links);
+        return tasks.update(task);
+    }
+
+    @Override
+    public Task markAsDone(UUID id) {
+        Task task = findById(id);
+        task.setDone(true);
+        return tasks.update(task);
+    }
+
+    @Override
     public Task findById(UUID id) {
         return tasks.findById(id).orElseThrow(
                 () ->

@@ -3,6 +3,7 @@ package com.esprit.gitesprit.academic.infrastructure.controller;
 import com.esprit.gitesprit.academic.domain.model.Task;
 import com.esprit.gitesprit.academic.domain.port.input.TaskUseCases;
 import com.esprit.gitesprit.academic.infrastructure.dto.request.AddTaskDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.request.UpdateTaskDto;
 import com.esprit.gitesprit.academic.infrastructure.dto.response.TaskDto;
 import com.esprit.gitesprit.academic.infrastructure.mapper.TaskMapper;
 import com.esprit.gitesprit.shared.pagination.CustomPage;
@@ -96,5 +97,25 @@ public class TaskController {
     public ResponseEntity<List<TaskDto>> findAllByGroupStudentId(@PathVariable UUID groupStudentId) {
         List<TaskDto> tasks = taskUseCases.findAllByGroupStudent(groupStudentId).stream().map(taskMapper::toResponseDto).toList();
         return ResponseEntity.ok(tasks);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TaskDto> update(@RequestBody @Valid UpdateTaskDto dto, @PathVariable UUID id){
+        Task task = taskMapper.toModelFromUpdate(dto);
+        task.setId(id);
+        Task savedTask = taskUseCases.update(task, id);
+        return ResponseEntity.ok(taskMapper.toResponseDto(savedTask));
+    }
+
+    @PutMapping("/{id}/update-branch")
+    public ResponseEntity<TaskDto> addBranch(@RequestBody List<String> links, @PathVariable UUID id){
+        Task savedTask = taskUseCases.assignBranch(id, links);
+        return ResponseEntity.ok(taskMapper.toResponseDto(savedTask));
+    }
+
+    @PutMapping("/mark-as-done/{id}")
+    public ResponseEntity<TaskDto> addBranch(@PathVariable UUID id){
+        Task savedTask = taskUseCases.markAsDone(id);
+        return ResponseEntity.ok(taskMapper.toResponseDto(savedTask));
     }
 }

@@ -14,4 +14,5 @@ public record GroupSimpleDto(
         Short version,
         UUID id,
         String name,
+        String subjectName,
         List<UserDto> students){}

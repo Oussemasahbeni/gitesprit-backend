@@ -2,6 +2,7 @@ package com.esprit.gitesprit.academic.infrastructure.mapper;
 
 import com.esprit.gitesprit.academic.domain.model.Task;
 import com.esprit.gitesprit.academic.infrastructure.dto.request.AddTaskDto;
+import com.esprit.gitesprit.academic.infrastructure.dto.request.UpdateTaskDto;
 import com.esprit.gitesprit.academic.infrastructure.dto.response.TaskDto;
 import com.esprit.gitesprit.academic.infrastructure.entity.TaskEntity;
 import com.esprit.gitesprit.shared.mapstruct.CycleAvoidingMappingContext;
@@ -28,6 +29,8 @@ public interface TaskMapper {
     TaskEntity partialUpdate(TaskEntity task, @MappingTarget TaskEntity target);
 
     Task toModelFromDto(AddTaskDto taskDto);
+
+    Task toModelFromUpdate(UpdateTaskDto taskDto);
 
     // Task toModelFromUpdateDto( taskDto);
 

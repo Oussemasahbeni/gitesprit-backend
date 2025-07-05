@@ -9,6 +9,8 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -23,6 +25,19 @@ public class Task extends AbstractAuditingModel {
     private Double mark;
     private String comment;
     private boolean done;
-    private String branchLink;
+    private List<String> branchLinks;
     private GroupStudent groupStudent;
+
+    public void addLink(String link) {
+        if (branchLinks == null) {
+            branchLinks = new ArrayList<>();
+        }
+        branchLinks.add(link);
+    }
+
+    public void removeSubject(String link) {
+        if (branchLinks != null) {
+            branchLinks.remove(link);
+        }
+    }
 }

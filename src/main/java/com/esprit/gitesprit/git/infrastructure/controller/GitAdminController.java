@@ -79,6 +79,19 @@ public class GitAdminController {
     }
 
     @GetMapping("/{groupId}")
+    public ResponseEntity<List<RepositoryDto>> listRepositoriesByGroupId(@PathVariable UUID groupId) {
+        try {
+            List<GitRepository> repos = gitRepositoryService.listGitRepositoriesByGroupId(groupId);
+            return ResponseEntity.ok(repos.stream().map(gitRepositoryMapper::toResponseDto).toList());
+//            return ResponseEntity.ok(repos.stream().map(GitRepository::getRepositoryName).toList());
+        } catch (Exception e) { // Catch generic exception as listRepositories no longer throws IOException
+            e.printStackTrace(); // Log this properly
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null); // Or an error object
+        }
+    }
+
+    @GetMapping("/names/{groupId}")
     public ResponseEntity<List<String>> listRepositoryNamesByGroupId(@PathVariable UUID groupId) {
         try {
             List<GitRepository> repos = gitRepositoryService.listGitRepositoriesByGroupId(groupId);

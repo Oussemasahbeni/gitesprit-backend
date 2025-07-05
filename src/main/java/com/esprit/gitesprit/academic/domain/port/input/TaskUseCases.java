@@ -13,6 +13,10 @@ public interface TaskUseCases {
 
     Task update(Task task, UUID groupStudentId);
 
+    Task assignBranch(UUID id, List<String> links);
+
+    Task markAsDone(UUID id);
+
     Task findById(UUID id);
 
     void deleteById(UUID id);

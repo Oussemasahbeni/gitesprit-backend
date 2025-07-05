@@ -32,7 +32,9 @@ public interface GroupMapper {
 
   // Group toModelFromUpdateDto( groupDto);
 
+  @Mapping(target = "subjectName", source = "subject.name")
   GroupSimpleDto toSimpleDto(Group group);
 
+  @Mapping(target = "nbRepositories", expression = "java(group.getRepositories() != null ? group.getRepositories().size() : 0)")
   GroupDto toResponseDto(Group group);
 }

@@ -16,6 +16,7 @@ public record GroupDto(
         String name,
         Double mark,
         String comment,
+        int nbRepositories,
         List<GroupStudentDto> students,
         SubjectSimpleDto subject
 ) {

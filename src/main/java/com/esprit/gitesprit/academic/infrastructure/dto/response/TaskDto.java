@@ -3,6 +3,7 @@ package com.esprit.gitesprit.academic.infrastructure.dto.response;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -20,6 +21,6 @@ public record TaskDto(
         Double mark,
         String comment,
         boolean done,
-        String branchLink
+        List<String> branchLinks
 ) {
 }

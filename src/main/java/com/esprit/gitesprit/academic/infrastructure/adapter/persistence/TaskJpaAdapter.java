@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,7 @@ import static com.esprit.gitesprit.academic.infrastructure.adapter.specification
 
 @PersistenceAdapter
 @RequiredArgsConstructor
+@Transactional
 public class TaskJpaAdapter implements Tasks {
     
     private final TaskRepository taskRepository;

@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -38,8 +39,10 @@ public class TaskEntity extends AbstractAuditingEntity {
     @Column(name = "done")
     private boolean done;
 
-    @Column(name = "branch_link")
-    private String branchLink;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "task_links", joinColumns = @JoinColumn(name = "task_id"))
+    @Column(name = "link")
+    private List<String> branchLinks;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_student_id", nullable = false)
