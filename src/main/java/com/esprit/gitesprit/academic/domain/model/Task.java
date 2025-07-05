@@ -23,6 +23,7 @@ public class Task extends AbstractAuditingModel {
     private String description;
     private LocalDate dueDate;
     private Double mark;
+    private Double percentage;
     private String comment;
     private boolean done;
     private List<String> branchLinks;

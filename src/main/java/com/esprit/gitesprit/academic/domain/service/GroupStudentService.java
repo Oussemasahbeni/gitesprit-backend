@@ -2,6 +2,7 @@ package com.esprit.gitesprit.academic.domain.service;
 
 import com.esprit.gitesprit.academic.domain.model.Group;
 import com.esprit.gitesprit.academic.domain.model.GroupStudent;
+import com.esprit.gitesprit.academic.domain.model.Task;
 import com.esprit.gitesprit.academic.domain.port.input.GroupStudentUseCases;
 import com.esprit.gitesprit.academic.domain.port.input.GroupUseCases;
 import com.esprit.gitesprit.academic.domain.port.output.GroupStudents;
@@ -93,6 +94,29 @@ public class GroupStudentService implements GroupStudentUseCases {
         // Set mark and comment
         groupStudent.setIndividualMark(mark);
         groupStudent.setIndividualComment(comment);
+
+        return groupStudents.update(groupStudent);
+    }
+
+    @Override
+    public GroupStudent calculateMark(UUID id) {
+        GroupStudent groupStudent = findById(id);
+        List<Task> tasks = groupStudent.getTasks();
+
+        double totalWeightedMarks = 0.0;
+        double totalPercentage = 0.0;
+
+        for (Task task : tasks) {
+            if (task.getMark() != null && task.getPercentage() != null) {
+                totalWeightedMarks += task.getMark() * task.getPercentage();
+                totalPercentage += task.getPercentage();
+            }
+        }
+
+        if (totalPercentage > 0) {
+            double average = totalWeightedMarks / totalPercentage;
+            groupStudent.setIndividualMark(average); // Assuming GroupStudent has a `mark` field
+        }
 
         return groupStudents.update(groupStudent);
     }

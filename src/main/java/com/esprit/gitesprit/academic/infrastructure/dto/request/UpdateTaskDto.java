@@ -9,6 +9,7 @@ public record UpdateTaskDto(
         Double mark,
         String comment,
         boolean done,
+        Double percentage,
         List<String> branchLinks
 ) {
 }

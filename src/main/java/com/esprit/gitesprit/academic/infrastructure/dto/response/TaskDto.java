@@ -19,6 +19,7 @@ public record TaskDto(
         String description,
         LocalDate dueDate,
         Double mark,
+        Double percentage,
         String comment,
         boolean done,
         List<String> branchLinks

@@ -103,4 +103,11 @@ public class GroupStudentController {
         GroupStudent groupStudent = groupStudentUseCases.findByGroupIdAndStudentId(groupId, studentId);
         return ResponseEntity.ok(groupStudentMapper.toDto(groupStudent));
     }
+
+
+    @PutMapping("/calculate-mark/{id}")
+    public ResponseEntity<GroupStudentDto> calculateMark(@PathVariable UUID id) {
+        GroupStudent groupStudent = groupStudentUseCases.calculateMark(id);
+        return ResponseEntity.ok(groupStudentMapper.toDto(groupStudent));
+    }
 }

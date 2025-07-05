@@ -36,6 +36,9 @@ public class TaskEntity extends AbstractAuditingEntity {
     @Column(columnDefinition = "TEXT")
     private String comment;
 
+    @Column(name = "percentage")
+    private Double percentage;
+
     @Column(name = "done")
     private boolean done;
 

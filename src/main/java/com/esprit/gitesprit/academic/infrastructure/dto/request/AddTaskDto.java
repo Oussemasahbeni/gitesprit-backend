@@ -8,6 +8,7 @@ import java.util.UUID;
 public record AddTaskDto(
         String description,
         LocalDate dueDate,
+        Double percentage,
         UUID groupStudentId
 ) {
 }

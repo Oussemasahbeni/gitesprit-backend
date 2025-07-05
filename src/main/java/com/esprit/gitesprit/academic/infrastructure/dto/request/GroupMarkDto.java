@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GroupMarkDto {
-    @NotNull(message = "Group mark is required")
-    @Min(value = 0, message = "Mark must be at least 0")
-    @Max(value = 20, message = "Mark must be at most 20")
-    private Double mark;
+//    @NotNull(message = "Group mark is required")
+//    @Min(value = 0, message = "Mark must be at least 0")
+//    @Max(value = 20, message = "Mark must be at most 20")
+//    private Double mark;
 
     private String comment;
 }

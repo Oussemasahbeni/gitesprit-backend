@@ -13,5 +13,6 @@ public interface GroupStudentUseCases {
     List<GroupStudent> findByStudentId(UUID studentId);
     GroupStudent findByGroupIdAndStudentId(UUID groupId, UUID studentId);
     GroupStudent addMarkToGroupStudent(UUID groupId, UUID studentId, Double mark, String comment);
+    GroupStudent calculateMark(UUID id);
     void deleteById(UUID id);
 }
