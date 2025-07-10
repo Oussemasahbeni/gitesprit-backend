@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -19,4 +20,5 @@ public class GroupStudentDto {
     private Double individualMark;
     private String individualComment;
     private Double finalMark;
+    private List<TaskDto> tasks;
 }

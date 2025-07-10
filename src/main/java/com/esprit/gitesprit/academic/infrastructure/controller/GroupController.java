@@ -132,7 +132,6 @@ public class GroupController {
             @Valid @RequestBody GroupMarkDto markDto) {
 
         Group group = groupUseCases.findById(groupId);
-        group.setMark(markDto.getMark());
         group.setComment(markDto.getComment());
         Group updatedGroup = groupUseCases.update(group);
 

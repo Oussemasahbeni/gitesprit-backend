@@ -7,7 +7,6 @@ import java.util.UUID;
 public record RepositoryDto(
         UUID id,
         String repositoryName,
-        String repositoryPath,
-        GroupDto group
+        String repositoryPath
 ) {
 }

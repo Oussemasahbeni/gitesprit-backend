@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
 import java.util.UUID;
 import com.esprit.gitesprit.shared.AbstractAuditingEntity;
 
@@ -48,6 +49,9 @@ public class GroupStudentEntity extends AbstractAuditingEntity {
 
     @Transient
     private Double finalStudentMarkInGroup;
+
+    @OneToMany(mappedBy = "groupStudent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TaskEntity> tasks;
 
     public Double calculateFinalStudentMarkInGroup() {
         if (group == null || group.getSubject() == null || individualMark == null || group.getMark() == null) {
