@@ -132,9 +132,23 @@ public class GroupController {
             @Valid @RequestBody GroupMarkDto markDto) {
 
         Group group = groupUseCases.findById(groupId);
+        group.setMark(markDto.getMark());
         group.setComment(markDto.getComment());
         Group updatedGroup = groupUseCases.update(group);
 
         return ResponseEntity.ok(groupMapper.toResponseDto(updatedGroup));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a group by ID", description = "Deletes a group and its associated data")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "204", description = "Group successfully deleted"),
+                    @ApiResponse(responseCode = "404", description = "Group not found", content = @Content),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+            })
+    public ResponseEntity<Void> deleteGroup(@PathVariable UUID id) {
+        groupUseCases.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
